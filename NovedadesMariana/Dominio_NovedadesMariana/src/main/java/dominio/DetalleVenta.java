@@ -1,39 +1,57 @@
 package dominio;
 
+import jakarta.persistence.Column;
+import java.io.Serializable;
+import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
 /**
  *
- * @author ramon
+ * @author Usuario
  */
-public class DetalleVenta {
-    private int id;
+@Entity
+public class DetalleVenta implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(name = "cantidad", length = 50, nullable = false, unique = true)
     private int cantidad;
+    
+    @Column(name = "precioUnitario", length = 50, nullable = false, unique = true)
     private float precioUnitario;
+    
+    @Column(name = "subtotal", length = 50, nullable = false, unique = true)
     private float subtotal;
-    private ProductoTalla productoTalla;
+    
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "detalle")
+    private List<ProductoTalla> tallas;
 
-    public DetalleVenta(int id, int cantidad, float precioUnitario, float subtotal, ProductoTalla productoTalla) {
-        this.id = id;
+    public DetalleVenta() {
+    }
+    
+    public DetalleVenta(int cantidad, float precioUnitario, float subtotal, List<ProductoTalla> tallas) {
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
         this.subtotal = subtotal;
-        this.productoTalla = productoTalla;
+        this.tallas = tallas;
     }
-
-    public DetalleVenta(int cantidad, float precioUnitario, float subtotal, ProductoTalla productoTalla) {
-        this.cantidad = cantidad;
-        this.precioUnitario = precioUnitario;
-        this.subtotal = subtotal;
-        this.productoTalla = productoTalla;
-    }
-
-    public int getId() {
+    
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
-
+    
     public int getCantidad() {
         return cantidad;
     }
@@ -58,18 +76,37 @@ public class DetalleVenta {
         this.subtotal = subtotal;
     }
 
-    public ProductoTalla getProductoTalla() {
-        return productoTalla;
+    public List<ProductoTalla> gettallas() {
+        return tallas;
     }
 
-    public void setProductoTalla(ProductoTalla productoTalla) {
-        this.productoTalla = productoTalla;
+    public void settallas(List<ProductoTalla> tallas) {
+        this.tallas = tallas;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof DetalleVenta)) {
+            return false;
+        }
+        DetalleVenta other = (DetalleVenta) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
-        return "DetalleVenta{" + "id=" + id + ", cantidad=" + cantidad + ", precioUnitario=" + precioUnitario + ", subtotal=" + subtotal + ", productoTalla=" + productoTalla + '}';
+        return "DetalleVenta{" + "id=" + id + ", cantidad=" + cantidad + ", precioUnitario=" + precioUnitario + ", subtotal=" + subtotal + ", tallas=" + tallas + '}';
     }
-    
      
 }

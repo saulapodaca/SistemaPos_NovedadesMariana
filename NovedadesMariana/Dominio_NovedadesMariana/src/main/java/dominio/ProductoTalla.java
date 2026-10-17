@@ -1,20 +1,36 @@
 package dominio;
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 
 /**
  *
- * @author ramon
+ * @author Usuario
  */
-public class ProductoTalla {
-    private Integer id;
+@Entity
+public class ProductoTalla implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    
+    @Column(name = "talla", length = 30, nullable = false, unique = true)
     private String talla;
+    
+    @Column(name = "usuario", nullable = false, unique = true)
     private Integer stockActual;
+    
+    @OneToMany
+    @JoinColumn(name = "idProducto")
     private Producto producto;
 
-    public ProductoTalla(Integer id, String talla, Integer stockActual, Producto producto) {
-        this.id = id;
-        this.talla = talla;
-        this.stockActual = stockActual;
-        this.producto = producto;
+    public ProductoTalla() {
     }
 
     public ProductoTalla(String talla, Integer stockActual, Producto producto) {
@@ -23,11 +39,11 @@ public class ProductoTalla {
         this.producto = producto;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -56,9 +72,28 @@ public class ProductoTalla {
     }
 
     @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof ProductoTalla)) {
+            return false;
+        }
+        ProductoTalla other = (ProductoTalla) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "ProductoTalla{" + "id=" + id + ", talla=" + talla + ", stockActual=" + stockActual + ", producto=" + producto + '}';
     }
-    
     
 }

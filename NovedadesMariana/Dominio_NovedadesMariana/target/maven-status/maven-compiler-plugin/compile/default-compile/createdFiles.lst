@@ -3,7 +3,9 @@ dominio\Usuario.class
 dominio\Pago.class
 dominio\Producto.class
 dominio\MetodoPago.class
+dominio\Categoria.class
 dominio\Categorias.class
 dominio\ProductoTalla.class
 dominio\RolEmpleado.class
 dominio\Venta.class
+dominio\TipoPrenda.class
