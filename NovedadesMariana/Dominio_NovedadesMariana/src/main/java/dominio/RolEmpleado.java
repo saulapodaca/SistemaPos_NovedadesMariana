@@ -5,6 +5,6 @@ package dominio;
  *
  * @author ramon
  */
-public class RolEmpleado {
-    
+public enum RolEmpleado {
+    ADMINISTRADORA,EMPLEADO
 }

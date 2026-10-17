@@ -4,6 +4,8 @@ package dominio;
  *
  * @author ramon
  */
-public class MetodoPago {
-    
+public enum MetodoPago {
+    EFECTIVO, 
+    TARJETA, 
+    TRANSFERENCIA
 }
