@@ -1,0 +1,9 @@
+package dominio;
+
+/**
+ *
+ * @author ramon
+ */
+public class Producto {
+    
+}

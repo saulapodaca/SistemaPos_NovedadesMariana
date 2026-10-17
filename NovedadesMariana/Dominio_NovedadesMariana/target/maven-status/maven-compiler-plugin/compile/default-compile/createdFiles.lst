@@ -1,0 +1,9 @@
+dominio\DetalleVenta.class
+dominio\Usuario.class
+dominio\Pago.class
+dominio\Producto.class
+dominio\MetodoPago.class
+dominio\Categorias.class
+dominio\ProductoTalla.class
+dominio\RolEmpleado.class
+dominio\Venta.class
