@@ -3,6 +3,12 @@
   <persistence-unit name="com.itson_Dominio_NovedadesMariana_jar_1.0-SNAPSHOTPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>dominio.Categoria</class>
+    <class>dominio.DetalleVenta</class>
+    <class>dominio.Pago</class>
+    <class>dominio.Producto</class>
+    <class>dominio.ProductoTalla</class>
+    <class>dominio.Usuario</class>
+    <class>dominio.Venta</class>
     <properties>
       <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/novedadesmariana?zeroDateTimeBehavior=CONVERT_TO_NULL"/>
       <property name="jakarta.persistence.jdbc.user" value="root"/>

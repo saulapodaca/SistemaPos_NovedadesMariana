@@ -1,58 +1,74 @@
+
 package dominio;
-import jakarta.persistence.Column;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import jakarta.persistence.*;
 
-/**
- *
- * @author Usuario
- */
 @Entity
 public class Venta implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    
-    @Column(name = "folio", length = 50, nullable = false, unique = true)
+
+    @Column(name = "folio", length = 50,
+            nullable = false, unique = true)
     private String folio;
-    
-    @Column(name = "fechaHora", length = 50, nullable = false, unique = true)
+
+    @Column(name = "fechaHora", nullable = false)
     private LocalDateTime fechaHora;
-    
-    @Column(name = "subtotal", length = 50, nullable = false, unique = true)
+
+    @Column(name = "subtotal", nullable = false)
     private float subtotal;
-    
-    @Column(name = "iva", length = 50, nullable = false, unique = true)
+
+    @Column(name = "iva", nullable = false)
     private float iva;
-    
-    @Column(name = "total", length = 50, nullable = false, unique = true)
+
+    @Column(name = "total", nullable = false)
     private float total;
-    
-    @OneToMany
-    @JoinColumn(name = "idUsuario")
+
+    // Relacion N:1 con Usuario
+    @ManyToOne(
+        fetch = FetchType.LAZY,
+        optional = false
+    )
+    @JoinColumn(name = "idUsuario", nullable = false)
     private Usuario usuario;
-    
-    @OneToMany
-    @JoinColumn(name = "idPago")
+
+    // Relacion 1:1 con Pago
+    @OneToOne(
+        cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+        },
+        optional = false
+    )
+    @JoinColumn(
+        name = "idPago",
+        nullable = false,
+        unique = true
+    )
     private Pago pago;
-    
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "venta")
-    private List<DetalleVenta> detalles;
+
+    // Relacion 1:N con DetalleVenta
+    @OneToMany(
+        mappedBy = "venta",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<DetalleVenta> detalles = new ArrayList<>();
 
     public Venta() {
     }
-    
-    public Venta(String folio, LocalDateTime fechaHora, float subtotal, float iva, float total, Usuario usuario, Pago pago) {
+
+    public Venta(String folio, LocalDateTime fechaHora,
+                 float subtotal, float iva, float total,
+                 Usuario usuario, Pago pago) {
         this.folio = folio;
         this.fechaHora = fechaHora;
         this.subtotal = subtotal;
@@ -62,6 +78,17 @@ public class Venta implements Serializable {
         this.pago = pago;
     }
 
+    // Agregar un detalle a la venta
+    public void agregarDetalle(DetalleVenta detalle) {
+        if (detalle != null) {
+            if (!detalles.contains(detalle)) {
+                detalles.add(detalle);
+            }
+            detalle.setVenta(this);
+        }
+    }
+
+    // Clave primaria
     public Long getId() {
         return id;
     }
@@ -69,7 +96,8 @@ public class Venta implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-    
+
+    // Folio
     public String getFolio() {
         return folio;
     }
@@ -78,6 +106,7 @@ public class Venta implements Serializable {
         this.folio = folio;
     }
 
+    // Fecha y hora
     public LocalDateTime getFechaHora() {
         return fechaHora;
     }
@@ -86,6 +115,7 @@ public class Venta implements Serializable {
         this.fechaHora = fechaHora;
     }
 
+    // Subtotal
     public float getSubtotal() {
         return subtotal;
     }
@@ -94,6 +124,7 @@ public class Venta implements Serializable {
         this.subtotal = subtotal;
     }
 
+    // IVA
     public float getIva() {
         return iva;
     }
@@ -102,6 +133,7 @@ public class Venta implements Serializable {
         this.iva = iva;
     }
 
+    // Total
     public float getTotal() {
         return total;
     }
@@ -110,6 +142,7 @@ public class Venta implements Serializable {
         this.total = total;
     }
 
+    // Usuario
     public Usuario getUsuario() {
         return usuario;
     }
@@ -118,6 +151,7 @@ public class Venta implements Serializable {
         this.usuario = usuario;
     }
 
+    // Pago
     public Pago getPago() {
         return pago;
     }
@@ -126,37 +160,52 @@ public class Venta implements Serializable {
         this.pago = pago;
     }
 
+    // Detalles de venta
     public List<DetalleVenta> getDetalles() {
         return detalles;
     }
 
-    public void setDetalles(List<DetalleVenta> detalles) {
-        this.detalles = detalles;
+    public void setDetalles(List<DetalleVenta> nuevosDetalles) {
+
+        List<DetalleVenta> copia = nuevosDetalles == null
+                ? new ArrayList<>()
+                : new ArrayList<>(nuevosDetalles);
+
+        // Quitar detalles que ya no pertenecen a la venta
+        for (DetalleVenta detalle : new ArrayList<>(this.detalles)) {
+            if (!copia.contains(detalle)) {
+                this.detalles.remove(detalle);
+                detalle.setVenta(null);
+            }
+        }
+
+        // Agregar detalles y mantener la relacion
+        for (DetalleVenta detalle : copia) {
+            agregarDetalle(detalle);
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Venta)) return false;
+
+        Venta other = (Venta) obj;
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Venta)) {
-            return false;
-        }
-        Venta other = (Venta) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return 31;
     }
 
     @Override
     public String toString() {
-        return "Venta{" + "id=" + id + ", folio=" + folio + ", fechaHora=" + fechaHora + ", subtotal=" + subtotal + ", iva=" + iva + ", total=" + total + ", usuario=" + usuario + ", pago=" + pago + ", detalles=" + detalles + '}';
+        return "Venta{id=" + id
+                + ", folio=" + folio
+                + ", fechaHora=" + fechaHora
+                + ", subtotal=" + subtotal
+                + ", iva=" + iva
+                + ", total=" + total + '}';
     }
-    
 }

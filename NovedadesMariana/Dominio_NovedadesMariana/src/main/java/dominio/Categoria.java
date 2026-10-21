@@ -1,43 +1,40 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package dominio;
 
-import jakarta.persistence.Column;
 import java.io.Serializable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import java.util.HashSet;
+import java.util.Set;
+import jakarta.persistence.*;
 
-/**
- *
- * @author Usuario
- */
 @Entity
 public class Categoria implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    
-    @Column(name = "nombre", length = 50, nullable = false, unique = true)
+
+    @Column(name = "nombre", length = 50,
+            nullable = false, unique = true)
     private String nombre;
-    
-    @Column(name = "descripcion", length = 200, nullable = false, unique = true)
+
+    @Column(name = "descripcion", length = 200,
+            nullable = false)
     private String descripcion;
 
-    public Categoria(Integer id, String nombre, String descripcion) {
-        
+    // Relación N:M con Producto
+    @ManyToMany(mappedBy = "categorias")
+    private Set<Producto> productos = new HashSet<>();
+
+    public Categoria() {
     }
 
     public Categoria(String nombre, String descripcion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -62,28 +59,33 @@ public class Categoria implements Serializable {
         this.descripcion = descripcion;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
+    public Set<Producto> getProductos() {
+        return productos;
+    }
+
+    public void setProductos(Set<Producto> productos) {
+        this.productos = productos == null
+                ? new HashSet<>() : productos;
     }
 
     @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Categoria)) {
-            return false;
-        }
-        Categoria other = (Categoria) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Categoria)) return false;
+
+        Categoria other = (Categoria) obj;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
     }
 
     @Override
     public String toString() {
-        return "Categoria{" + "id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + '}';
+        return "Categoria{id=" + id
+                + ", nombre=" + nombre
+                + ", descripcion=" + descripcion + '}';
     }
 }

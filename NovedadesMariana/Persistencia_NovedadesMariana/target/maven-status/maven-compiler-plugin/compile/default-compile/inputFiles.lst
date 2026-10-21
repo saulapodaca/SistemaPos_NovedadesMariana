@@ -1,0 +1,15 @@
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\entityManager\ConexionJPA.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\implementaciones\CategoriaDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\implementaciones\DetalleVentaDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\implementaciones\PagoDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\implementaciones\ProductoDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\implementaciones\ProductoTallaDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\implementaciones\UsuarioDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\implementaciones\VentaDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\interfaces\ICategoriaDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\interfaces\IDetalleVentaDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\interfaces\IPagoDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\interfaces\IProductoDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\interfaces\IProductoTallaDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\interfaces\IUsuarioDAO.java
+C:\Users\rauln\Documents\GitHub\SistemaPos_NovedadesMariana\NovedadesMariana\Persistencia_NovedadesMariana\src\main\java\interfaces\IVentaDAO.java

@@ -1,41 +1,42 @@
-package dominio;
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 
-/**
- *
- * @author Usuario
- */
+package dominio;
+
+import java.io.Serializable;
+import jakarta.persistence.*;
+
 @Entity
+@Table(
+    uniqueConstraints = @UniqueConstraint(
+        name = "uq_producto_talla",
+        columnNames = {"idProducto", "talla"}
+    )
+)
 public class ProductoTalla implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    
-    @Column(name = "talla", length = 30, nullable = false, unique = true)
+
+    @Column(name = "talla", length = 30, nullable = false)
     private String talla;
-    
-    @Column(name = "usuario", nullable = false, unique = true)
+
+    @Column(name = "stockActual", nullable = false)
     private Integer stockActual;
-    
-    @OneToMany
-    @JoinColumn(name = "idProducto")
+
+    // Relacion N:1 con Producto
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idProducto", nullable = false)
     private Producto producto;
 
     public ProductoTalla() {
     }
 
-    public ProductoTalla(String talla, Integer stockActual, Producto producto) {
+    public ProductoTalla(String talla, Integer stockActual,
+                         Producto producto) {
         this.talla = talla;
-        this.stockActual = stockActual;
+        setStockActual(stockActual);
         this.producto = producto;
     }
 
@@ -60,6 +61,11 @@ public class ProductoTalla implements Serializable {
     }
 
     public void setStockActual(Integer stockActual) {
+        if (stockActual == null || stockActual < 0) {
+            throw new IllegalArgumentException(
+                "El stock no puede ser nulo ni negativo."
+            );
+        }
         this.stockActual = stockActual;
     }
 
@@ -72,28 +78,23 @@ public class ProductoTalla implements Serializable {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof ProductoTalla)) return false;
+
+        ProductoTalla other = (ProductoTalla) obj;
+        return id != null && id.equals(other.id);
     }
 
     @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof ProductoTalla)) {
-            return false;
-        }
-        ProductoTalla other = (ProductoTalla) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+    public int hashCode() {
+        return 31;
     }
 
     @Override
     public String toString() {
-        return "ProductoTalla{" + "id=" + id + ", talla=" + talla + ", stockActual=" + stockActual + ", producto=" + producto + '}';
+        return "ProductoTalla{id=" + id
+                + ", talla=" + talla
+                + ", stockActual=" + stockActual + '}';
     }
-    
 }

@@ -1,49 +1,48 @@
+
 package dominio;
 
-import jakarta.persistence.Column;
 import java.io.Serializable;
-import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import jakarta.persistence.*;
 
-/**
- *
- * @author Usuario
- */
 @Entity
 public class DetalleVenta implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "cantidad", length = 50, nullable = false, unique = true)
+    @Column(name = "cantidad", nullable = false)
     private int cantidad;
-    
-    @Column(name = "precioUnitario", length = 50, nullable = false, unique = true)
+
+    @Column(name = "precioUnitario", nullable = false)
     private float precioUnitario;
-    
-    @Column(name = "subtotal", length = 50, nullable = false, unique = true)
+
+    @Column(name = "subtotal", nullable = false)
     private float subtotal;
-    
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "detalle")
-    private List<ProductoTalla> tallas;
+
+    // Relación N:1 con Venta
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idVenta", nullable = false)
+    private Venta venta;
+
+    // Relación N:1 con Producto
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idProducto", nullable = false)
+    private Producto producto;
 
     public DetalleVenta() {
     }
-    
-    public DetalleVenta(int cantidad, float precioUnitario, float subtotal, List<ProductoTalla> tallas) {
+
+    public DetalleVenta(int cantidad, float precioUnitario,
+                        float subtotal, Producto producto) {
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
         this.subtotal = subtotal;
-        this.tallas = tallas;
+        this.producto = producto;
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -51,7 +50,7 @@ public class DetalleVenta implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public int getCantidad() {
         return cantidad;
     }
@@ -76,37 +75,41 @@ public class DetalleVenta implements Serializable {
         this.subtotal = subtotal;
     }
 
-    public List<ProductoTalla> gettallas() {
-        return tallas;
+    public Venta getVenta() {
+        return venta;
     }
 
-    public void settallas(List<ProductoTalla> tallas) {
-        this.tallas = tallas;
+    public void setVenta(Venta venta) {
+        this.venta = venta;
+    }
+
+    public Producto getProducto() {
+        return producto;
+    }
+
+    public void setProducto(Producto producto) {
+        this.producto = producto;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof DetalleVenta)) return false;
+
+        DetalleVenta other = (DetalleVenta) obj;
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof DetalleVenta)) {
-            return false;
-        }
-        DetalleVenta other = (DetalleVenta) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return 31;
     }
 
     @Override
     public String toString() {
-        return "DetalleVenta{" + "id=" + id + ", cantidad=" + cantidad + ", precioUnitario=" + precioUnitario + ", subtotal=" + subtotal + ", tallas=" + tallas + '}';
+        return "DetalleVenta{id=" + id
+                + ", cantidad=" + cantidad
+                + ", precioUnitario=" + precioUnitario
+                + ", subtotal=" + subtotal + '}';
     }
-     
 }

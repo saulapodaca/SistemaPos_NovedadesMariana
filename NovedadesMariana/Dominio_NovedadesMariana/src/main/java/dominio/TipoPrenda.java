@@ -9,5 +9,16 @@ package dominio;
  * @author ramonsebastianzamudioayala
  */
 public enum TipoPrenda {
-    
+
+    PLAYERA,
+    CAMISA,
+    BLUSA,
+    PANTALON,
+    SHORT,
+    FALDA,
+    VESTIDO,
+    SUDADERA,
+    SUETER,
+    CONJUNTO
 }
+
