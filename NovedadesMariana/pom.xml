@@ -8,13 +8,14 @@
     <modules>
         <module>Dominio_NovedadesMariana</module>
         <module>Persistencia_NovedadesMariana</module>
-        <module>objetosNegocio</module>
         <module>dto_negocios</module>
+        <module>objetosNegocio</module>
         <module>negocios_GestorEmpleados</module>
         <module>negocios_GestorInventario</module>
         <module>negocios_GestorVentas</module>
         <module>negocios_GestorPagos</module>
         <module>negocios_RealizarVenta</module>
+        <module>presentacion_NovedadesMariana</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
