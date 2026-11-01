@@ -35,6 +35,7 @@ public class VentaBO implements IVentaBO{
 
     @Override
     public synchronized VentaDTO registrarVenta(VentaDTO venta) {
+        validarVenta(venta);
         venta.setId(consecutivoId++);
         venta.setFolio("VEN-" + String.format("%05d", venta.getId()));
         venta.setFechaHora(LocalDateTime.now());
@@ -44,6 +45,9 @@ public class VentaBO implements IVentaBO{
 
     @Override
     public VentaDTO obtenerPorId(int id) {
+        if (id <= 0) {
+            throw new IllegalArgumentException("El ID de venta debe ser mayor a cero.");
+        }
         return ventasMock.stream()
                 .filter(v -> v.getId() == id)
                 .findFirst()
@@ -52,18 +56,30 @@ public class VentaBO implements IVentaBO{
 
     @Override
     public VentaDTO obtenerPorFolio(String folio) {
+        if (folio == null || folio.isBlank()) {
+            throw new IllegalArgumentException("El folio de venta no puede estar vacío.");
+        }
+        String folioBusqueda = folio.trim();
         return ventasMock.stream()
-                .filter(v -> v.getFolio().equalsIgnoreCase(folio))
+                .filter(v -> v.getFolio().equalsIgnoreCase(folioBusqueda))
                 .findFirst()
                 .orElse(null);
     }
 
     @Override
     public ResumenVentaDTO calcularTotales(List<DetalleVentaDTO> detalles, float descuento) {
+        if (detalles == null || detalles.isEmpty()) {
+            throw new IllegalArgumentException("La venta debe incluir al menos un detalle.");
+        }
+        if (!Float.isFinite(descuento) || descuento < 0.0f || descuento > 100.0f) {
+            throw new IllegalArgumentException("El descuento debe estar entre 0 y 100 por ciento.");
+        }
         float subtotal = 0.0f;
-        if (detalles != null) {
-            for (DetalleVentaDTO d : detalles) {
-                subtotal += d.getCantidad() * d.getPrecioUnitario();
+        for (DetalleVentaDTO d : detalles) {
+            validarDetalle(d);
+            subtotal += d.getCantidad() * d.getPrecioUnitario();
+            if (!Float.isFinite(subtotal)) {
+                throw new IllegalArgumentException("El subtotal excede el rango permitido.");
             }
         }
         float montoDescuento = subtotal * (descuento / 100.0f);
@@ -76,6 +92,44 @@ public class VentaBO implements IVentaBO{
 
     @Override
     public boolean cancelarVenta(int idVenta) {
+        if (idVenta <= 0) {
+            throw new IllegalArgumentException("El ID de venta debe ser mayor a cero.");
+        }
         return ventasMock.removeIf(v -> v.getId() == idVenta);
+    }
+
+    private void validarVenta(VentaDTO venta) {
+        if (venta == null) {
+            throw new IllegalArgumentException("La venta no puede ser nula.");
+        }
+        if (venta.getIdUsuario() <= 0) {
+            throw new IllegalArgumentException("La venta debe tener un empleado válido.");
+        }
+        if (venta.getDetalles() == null || venta.getDetalles().isEmpty()) {
+            throw new IllegalArgumentException("La venta debe incluir al menos un detalle.");
+        }
+        if (!Float.isFinite(venta.getSubtotal()) || venta.getSubtotal() < 0.0f
+                || !Float.isFinite(venta.getIva()) || venta.getIva() < 0.0f
+                || !Float.isFinite(venta.getTotal()) || venta.getTotal() <= 0.0f) {
+            throw new IllegalArgumentException("Los importes de la venta deben ser válidos y no negativos.");
+        }
+        for (DetalleVentaDTO detalle : venta.getDetalles()) {
+            validarDetalle(detalle);
+        }
+    }
+
+    private void validarDetalle(DetalleVentaDTO detalle) {
+        if (detalle == null) {
+            throw new IllegalArgumentException("La venta contiene un detalle nulo.");
+        }
+        if (detalle.getIdProductoTalla() <= 0) {
+            throw new IllegalArgumentException("Cada detalle debe identificar una talla de producto válida.");
+        }
+        if (detalle.getCantidad() <= 0) {
+            throw new IllegalArgumentException("La cantidad de cada detalle debe ser mayor a cero.");
+        }
+        if (!Float.isFinite(detalle.getPrecioUnitario()) || detalle.getPrecioUnitario() < 0.0f) {
+            throw new IllegalArgumentException("El precio unitario debe ser válido y no negativo.");
+        }
     }
 }

@@ -35,14 +35,22 @@ public class UsuarioBO implements IUsuarioBO{
     @Override
 
     public UsuarioDTO autenticar(String usuario, String contrasenia) {
+        if (usuario == null || usuario.isBlank()
+                || contrasenia == null || contrasenia.isEmpty()) {
+            throw new IllegalArgumentException("El usuario y la contraseña son obligatorios.");
+        }
+        String nombreUsuario = usuario.trim();
         return usuariosMock.stream()
-                .filter(u -> u.getUsuario().equalsIgnoreCase(usuario) && u.getContrasenia().equals(contrasenia))
+                .filter(u -> u.getUsuario().equalsIgnoreCase(nombreUsuario) && u.getContrasenia().equals(contrasenia))
                 .findFirst()
                 .orElse(null);
     }
 
     @Override
     public UsuarioDTO obtenerPorId(int id) {
+        if (id <= 0) {
+            throw new IllegalArgumentException("El ID de usuario debe ser mayor a cero.");
+        }
         return usuariosMock.stream()
                 .filter(u -> u.getId() == id)
                 .findFirst()
@@ -51,8 +59,12 @@ public class UsuarioBO implements IUsuarioBO{
 
     @Override
     public UsuarioDTO obtenerPorUsuario(String usuario) {
+        if (usuario == null || usuario.isBlank()) {
+            throw new IllegalArgumentException("El nombre de usuario no puede estar vacío.");
+        }
+        String nombreUsuario = usuario.trim();
         return usuariosMock.stream()
-                .filter(u -> u.getUsuario().equalsIgnoreCase(usuario))
+                .filter(u -> u.getUsuario().equalsIgnoreCase(nombreUsuario))
                 .findFirst()
                 .orElse(null);
     }

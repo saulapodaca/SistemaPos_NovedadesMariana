@@ -36,6 +36,9 @@ public class ProductoBO implements IProductoBO {
 
     @Override
     public ProductoDTO obtenerPorId(int id) {
+        if (id <= 0) {
+            throw new IllegalArgumentException("El ID de producto debe ser mayor a cero.");
+        }
         return productosMock.stream()
                 .filter(p -> p.getId() == id)
                 .findFirst()
@@ -44,14 +47,21 @@ public class ProductoBO implements IProductoBO {
 
     @Override
     public ProductoDTO obtenerPorSku(String sku) {
+        if (sku == null || sku.isBlank()) {
+            throw new IllegalArgumentException("El SKU o código de barras no puede estar vacío.");
+        }
+        String codigo = sku.trim();
         return productosMock.stream()
-                .filter(p -> p.getSku().equalsIgnoreCase(sku) || p.getCodigoBarras().equals(sku))
+                .filter(p -> p.getSku().equalsIgnoreCase(codigo) || p.getCodigoBarras().equals(codigo))
                 .findFirst()
                 .orElse(null);
     }
 
     @Override
     public List<ProductoDTO> listarProductosPorCategoria(int idCategoria) {
+        if (idCategoria <= 0) {
+            throw new IllegalArgumentException("El ID de categoría debe ser mayor a cero.");
+        }
         return productosMock.stream()
                 .filter(p -> p.getIdCategoria() == idCategoria)
                 .collect(Collectors.toList());
@@ -59,10 +69,14 @@ public class ProductoBO implements IProductoBO {
 
     @Override
     public List<ProductoDTO> buscarProductos(String criterio) {
-        String lower = criterio.toLowerCase();
+        if (criterio == null || criterio.isBlank()) {
+            throw new IllegalArgumentException("El criterio de búsqueda no puede estar vacío.");
+        }
+        String busqueda = criterio.trim();
+        String lower = busqueda.toLowerCase();
         return productosMock.stream()
                 .filter(p -> p.getNombre().toLowerCase().contains(lower)
-                        || p.getCodigoBarras().contains(criterio)
+                        || p.getCodigoBarras().contains(busqueda)
                         || p.getSku().toLowerCase().contains(lower))
                 .collect(Collectors.toList());
     }

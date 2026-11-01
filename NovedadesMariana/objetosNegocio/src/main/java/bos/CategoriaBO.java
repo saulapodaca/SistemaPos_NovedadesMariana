@@ -39,6 +39,9 @@ public class CategoriaBO implements ICategoriaBO{
 
     @Override
     public CategoriaDTO obtenerPorId(int id) {
+        if (id <= 0) {
+            throw new IllegalArgumentException("El ID de categoría debe ser mayor a cero.");
+        }
         return categoriasMock.stream()
                 .filter(c -> c.getId() == id)
                 .findFirst()

@@ -42,40 +42,60 @@ public class ProductoTallaBO implements IProductoTallaBO{
 
     @Override
     public boolean validarStockDisponible(int idProductoTalla, int cantidadRequerida) {
-        return tallasMock.stream()
+        if (idProductoTalla <= 0 || cantidadRequerida <= 0) {
+            throw new IllegalArgumentException("El ID de talla y la cantidad requerida deben ser mayores a cero.");
+        }
+        ProductoTallaDTO talla = tallasMock.stream()
                 .filter(t -> t.getId() == idProductoTalla)
                 .findFirst()
-                .map(t -> t.getStockActual() >= cantidadRequerida)
-                .orElse(false);
+                .orElseThrow(() -> new IllegalArgumentException("No existe la talla de producto con ID " + idProductoTalla + "."));
+        if (talla.getStockActual() < cantidadRequerida) {
+            throw new IllegalStateException("Stock insuficiente para la talla " + talla.getTalla()
+                    + ". Disponible: " + talla.getStockActual() + ", solicitado: " + cantidadRequerida + ".");
+        }
+        return true;
     }
 
     @Override
     public synchronized boolean descontarStock(int idProductoTalla, int cantidad) {
+        if (idProductoTalla <= 0 || cantidad <= 0) {
+            throw new IllegalArgumentException("El ID de talla y la cantidad a descontar deben ser mayores a cero.");
+        }
         for (ProductoTallaDTO talla : tallasMock) {
             if (talla.getId() == idProductoTalla) {
                 if (talla.getStockActual() >= cantidad) {
                     talla.setStockActual(talla.getStockActual() - cantidad);
                     return true;
                 }
-                return false;
+                throw new IllegalStateException("Stock insuficiente para la talla " + talla.getTalla()
+                        + ". Disponible: " + talla.getStockActual() + ", solicitado: " + cantidad + ".");
             }
         }
-        return false;
+        throw new IllegalArgumentException("No existe la talla de producto con ID " + idProductoTalla + ".");
     }
 
     @Override
     public synchronized boolean reabastecerStock(int idProductoTalla, int cantidad) {
+        if (idProductoTalla <= 0 || cantidad <= 0) {
+            throw new IllegalArgumentException("El ID de talla y la cantidad a reabastecer deben ser mayores a cero.");
+        }
         for (ProductoTallaDTO talla : tallasMock) {
             if (talla.getId() == idProductoTalla) {
+                if (talla.getStockActual() > Integer.MAX_VALUE - cantidad) {
+                    throw new IllegalArgumentException("El reabastecimiento excede el stock máximo permitido.");
+                }
                 talla.setStockActual(talla.getStockActual() + cantidad);
                 return true;
             }
         }
-        return false;
+        throw new IllegalArgumentException("No existe la talla de producto con ID " + idProductoTalla + ".");
     }
 
     @Override
     public List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto) {
+        if (idProducto <= 0) {
+            throw new IllegalArgumentException("El ID de producto debe ser mayor a cero.");
+        }
         return tallasMock.stream()
                 .filter(t -> t.getIdProducto() == idProducto)
                 .collect(Collectors.toList());
