@@ -12,11 +12,12 @@ import java.util.List;
  * @author saula
  */
 public interface IProductoBO {
-    ProductoDTO obtenerPorId(int id);
-
+    public void guardar(ProductoDTO producto) throws Exception;
+    public void actualizar(ProductoDTO producto) throws Exception;
+    public void eliminar(Long id) throws Exception;
+    public List<ProductoDTO> obtenerTodos();
+    ProductoDTO obtenerPorId(Long id);
     ProductoDTO obtenerPorSku(String sku);
-
-    List<ProductoDTO> listarProductosPorCategoria(int idCategoria);
-
+    List<ProductoDTO> listarProductosPorCategoria(Long idCategoria);
     List<ProductoDTO> buscarProductos(String criterio);
 }

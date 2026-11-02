@@ -4,16 +4,20 @@
  */
 package interfaces;
 
+import dominio.Usuario;
 import dtos.UsuarioDTO;
+import java.util.List;
 
 /**
  *
  * @author saula
  */
 public interface IUsuarioBO {
-    UsuarioDTO autenticar(String usuario, String contrasenia);
-
-    UsuarioDTO obtenerPorId(int id);
-
-    UsuarioDTO obtenerPorUsuario(String usuario);
+    public UsuarioDTO autenticar(String usuario, String contrasenia) throws Exception ;
+    public void guardar(UsuarioDTO usuario) throws Exception;
+    public void actualizar(UsuarioDTO usuario) throws Exception;
+    public void eliminar(Long id) throws Exception;
+    public UsuarioDTO buscarPorId(Long id) throws Exception;
+    public List<UsuarioDTO> obtenerTodos() throws Exception ;
+    public Usuario buscarPorUsuario(String nombreUsuario) throws Exception ;
 }

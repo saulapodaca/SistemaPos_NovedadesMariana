@@ -114,9 +114,6 @@ public class CategoriaBO implements ICategoriaBO {
                 .collect(Collectors.toList());
     }
 
-    // =========================================================================
-    // Métodos Auxiliares de Validación
-    // =========================================================================
 
     /**
      * Valida la estructura y restricciones de un CategoriaDTO.

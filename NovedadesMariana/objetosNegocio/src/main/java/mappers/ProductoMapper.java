@@ -22,7 +22,7 @@ public class ProductoMapper {
             : producto.getCategorias().stream()
                     .map(Categoria::getId) 
                     .collect(Collectors.toSet());
-        return new ProductoDTO(producto.getCodigoBarras(), producto.getSku(), 
+        return new ProductoDTO(producto.getId(),producto.getCodigoBarras(), producto.getSku(), 
                 producto.getNombre(), producto.getDescripcion(), producto.getPrecio(),
                 TipoPrendaMapper.toDto(producto.getTipoPrenda()),categoriasIds);
     }

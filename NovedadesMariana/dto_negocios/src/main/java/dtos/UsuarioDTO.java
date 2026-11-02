@@ -10,7 +10,7 @@ package dtos;
  */
 public class UsuarioDTO {
     
-    private int id;
+    private Long id;
     private String usuario;
     private String contrasenia;
     private String nombres;
@@ -22,7 +22,7 @@ public class UsuarioDTO {
         
     }
 
-    public UsuarioDTO(int id, String usuario, String contrasenia, String nombres, String primerApellido, String segundoApellido, String rolEmpleado) {
+    public UsuarioDTO(Long id, String usuario, String contrasenia, String nombres, String primerApellido, String segundoApellido, String rolEmpleado) {
         this.id = id;
         this.usuario = usuario;
         this.contrasenia = contrasenia;
@@ -32,11 +32,11 @@ public class UsuarioDTO {
         this.rolEmpleado = rolEmpleado;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

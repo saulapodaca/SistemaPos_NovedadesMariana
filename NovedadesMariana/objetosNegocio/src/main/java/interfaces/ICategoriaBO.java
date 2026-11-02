@@ -4,6 +4,7 @@
  */
 package interfaces;
 
+import dominio.Categoria;
 import dtos.CategoriaDTO;
 import java.util.List;
 
@@ -12,7 +13,11 @@ import java.util.List;
  * @author saula
  */
 public interface ICategoriaBO {
-    List<CategoriaDTO> listarCategorias();
-
-    CategoriaDTO obtenerPorId(int id);
+    public List<CategoriaDTO> listarCategorias();
+    public CategoriaDTO obtenerPorId(Long id);
+    public void guardar(CategoriaDTO categoria) throws Exception;
+    public void actualizar(CategoriaDTO categoria) throws Exception;
+    public void eliminar(Long id) throws Exception;
+    public CategoriaDTO buscarPorId(Long id);
+    public List<CategoriaDTO> obtenerTodas();
 }
