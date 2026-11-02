@@ -1,4 +1,3 @@
-
 package dominio;
 
 import java.io.Serializable;
@@ -20,6 +19,10 @@ public class Producto implements Serializable {
     @Column(name = "sku", nullable = false,
             length = 50, unique = true)
     private String sku;
+
+    @Column(name = "codigo_barras", nullable = false,
+            length = 50, unique = true)
+    private String codigoBarras;
 
     @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
@@ -58,10 +61,11 @@ public class Producto implements Serializable {
     public Producto() {
     }
 
-    public Producto(String sku, String nombre,
+    public Producto(String sku, String codigoBarras, String nombre,
                     String descripcion, Float precio,
                     TipoPrenda tipoPrenda) {
         this.sku = sku;
+        this.codigoBarras = codigoBarras;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
@@ -106,6 +110,15 @@ public class Producto implements Serializable {
 
     public void setSku(String sku) {
         this.sku = sku;
+    }
+
+    // Codigo de barras
+    public String getCodigoBarras() {
+        return codigoBarras;
+    }
+
+    public void setCodigoBarras(String codigoBarras) {
+        this.codigoBarras = codigoBarras;
     }
 
     // Nombre
@@ -209,6 +222,7 @@ public class Producto implements Serializable {
     public String toString() {
         return "Producto{id=" + id
                 + ", sku=" + sku
+                + ", codigoBarras=" + codigoBarras
                 + ", nombre=" + nombre
                 + ", descripcion=" + descripcion
                 + ", precio=" + precio

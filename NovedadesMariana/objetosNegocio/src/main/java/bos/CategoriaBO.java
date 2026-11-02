@@ -5,7 +5,9 @@
 package bos;
 
 import dtos.CategoriaDTO;
+import implementaciones.CategoriaDAO;
 import interfaces.ICategoriaBO;
+import interfaces.ICategoriaDAO;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,13 +18,11 @@ import java.util.List;
 public class CategoriaBO implements ICategoriaBO{
 
     private static CategoriaBO instance;
-    private final List<CategoriaDTO> categoriasMock;
+    private ICategoriaDAO categoriaDAO;
 
     private CategoriaBO() {
-        categoriasMock = new ArrayList<>();
-        categoriasMock.add(new CategoriaDTO(1, "Bebé", "Ropa y mamelucos para recién nacidos"));
-        categoriasMock.add(new CategoriaDTO(2, "Niña", "Vestidos y conjuntos infantiles"));
-        categoriasMock.add(new CategoriaDTO(3, "Dama", "Blusas, faldas y vestidos casuales"));
+        categoriaDAO = new CategoriaDAO();
+        
     }
 
     public static synchronized CategoriaBO getInstance() {
@@ -34,17 +34,11 @@ public class CategoriaBO implements ICategoriaBO{
 
     @Override
     public List<CategoriaDTO> listarCategorias() {
-        return new ArrayList<>(categoriasMock);
+        return null;
     }
 
     @Override
     public CategoriaDTO obtenerPorId(int id) {
-        if (id <= 0) {
-            throw new IllegalArgumentException("El ID de categoría debe ser mayor a cero.");
-        }
-        return categoriasMock.stream()
-                .filter(c -> c.getId() == id)
-                .findFirst()
-                .orElse(null);
+        return null;
     }
 }

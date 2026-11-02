@@ -4,24 +4,26 @@
  */
 package dtos;
 
+import java.util.HashSet;
+import java.util.Set;
 /**
  *
  * @author saula
  */
 public class ProductoDTO {
-    private int id;
+    private Long id;
     private String codigoBarras;
     private String sku;
     private String nombre;
     private String descripcion;
     private float precio;
-    private String tipoPrenda;
-    private int idCategoria;
+    private TipoPrendaDTO tipoPrenda;
+    private Set<Long> categoriasIds = new HashSet<>();
 
     public ProductoDTO() {
     }
 
-    public ProductoDTO(int id, String codigoBarras, String sku, String nombre, String descripcion, float precio, String tipoPrenda, int idCategoria) {
+    public ProductoDTO(Long id, String codigoBarras, String sku, String nombre, String descripcion, float precio, TipoPrendaDTO tipoPrenda, Set<Long> categoriasIds) {
         this.id = id;
         this.codigoBarras = codigoBarras;
         this.sku = sku;
@@ -29,14 +31,24 @@ public class ProductoDTO {
         this.descripcion = descripcion;
         this.precio = precio;
         this.tipoPrenda = tipoPrenda;
-        this.idCategoria = idCategoria;
+        this.categoriasIds = categoriasIds;
     }
 
-    public int getId() {
+    public ProductoDTO(String codigoBarras, String sku, String nombre, String descripcion, float precio, TipoPrendaDTO tipoPrenda, Set<Long> categoriasIds) {
+        this.codigoBarras = codigoBarras;
+        this.sku = sku;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.tipoPrenda = tipoPrenda;
+        this.categoriasIds = categoriasIds;
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -80,20 +92,19 @@ public class ProductoDTO {
         this.precio = precio;
     }
 
-    public String getTipoPrenda() {
+    public TipoPrendaDTO getTipoPrenda() {
         return tipoPrenda;
     }
 
-    public void setTipoPrenda(String tipoPrenda) {
+    public void setTipoPrenda(TipoPrendaDTO tipoPrenda) {
         this.tipoPrenda = tipoPrenda;
     }
 
-    public int getIdCategoria() {
-        return idCategoria;
+    public Set<Long> getCategoriasIds() {
+        return categoriasIds;
     }
 
-    public void setIdCategoria(int idCategoria) {
-        this.idCategoria = idCategoria;
+    public void setCategoriasIds(Set<Long> categoriasIds) {
+        this.categoriasIds = categoriasIds;
     }
-    
 }

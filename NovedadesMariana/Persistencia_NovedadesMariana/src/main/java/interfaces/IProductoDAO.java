@@ -12,9 +12,12 @@ import java.util.List;
  * @author rauln
  */
 public interface IProductoDAO {
-    void guardar(Producto producto) throws Exception;
-    void actualizar(Producto producto) throws Exception;
-    void eliminar(Long id) throws Exception;
-    Producto buscarPorId(Long id);
-    List<Producto> obtenerTodos();
+    public void guardar(Producto producto) throws Exception;
+    public void actualizar(Producto producto) throws Exception;
+    public void eliminar(Long id) throws Exception;
+    public Producto buscarPorId(Long id);
+    public List<Producto> obtenerTodos();
+    public Producto obtenerPorSku(String sku);
+    public List<Producto> listarProductosPorCategoria(Long idCategoria);
+    public List<Producto> buscarProductos(String criterio);
 }

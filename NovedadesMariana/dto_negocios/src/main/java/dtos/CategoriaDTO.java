@@ -9,24 +9,29 @@ package dtos;
  * @author saula
  */
 public class CategoriaDTO {
-    private int id;
+    private Long id;
     private String nombre;
     private String descripcion;
 
     public CategoriaDTO() {
     }
 
-    public CategoriaDTO(int id, String nombre, String descripcion) {
+    public CategoriaDTO(Long id, String nombre, String descripcion) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
+    
+    public CategoriaDTO( String nombre, String descripcion) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+    }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

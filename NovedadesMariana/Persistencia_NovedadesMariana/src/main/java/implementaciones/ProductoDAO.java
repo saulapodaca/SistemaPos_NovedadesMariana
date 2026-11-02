@@ -7,6 +7,8 @@ import dominio.ProductoTalla;
 import entityManager.ConexionJPA;
 import interfaces.IProductoDAO;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -331,6 +333,102 @@ public class ProductoDAO implements IProductoDAO {
             throw new IllegalArgumentException(
                 "Debe seleccionar un tipo de prenda."
             );
+        }
+    }
+    
+    @Override
+    public Producto obtenerPorSku(String sku) {
+        if (sku == null || sku.isBlank()) {
+            return null;
+        }
+
+        EntityManager em = conexion.getEntityManager();
+        try {
+            Producto producto = em.createQuery(
+                "SELECT DISTINCT p FROM Producto p " +
+                "LEFT JOIN FETCH p.categorias " +
+                "LEFT JOIN FETCH p.tipoPrenda " +
+                "WHERE LOWER(p.sku) = LOWER(:sku)",
+                Producto.class
+            )
+            .setParameter("sku", sku.trim())
+            .getSingleResult();
+
+            // Cargar colección de tallas si aplica
+            if (producto.getTallas() != null) {
+                producto.getTallas().size();
+            }
+
+            return producto;
+        } catch (NoResultException e) {
+            return null; // Retorna null de forma segura si no existe el SKU
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Producto> listarProductosPorCategoria(Long idCategoria) {
+        if (idCategoria == null || idCategoria <= 0) {
+            return Collections.emptyList();
+        }
+
+        EntityManager em = conexion.getEntityManager();
+        try {
+            List<Producto> productos = em.createQuery(
+                "SELECT DISTINCT p FROM Producto p " +
+                "JOIN p.categorias c " +
+                "LEFT JOIN FETCH p.categorias " +
+                "LEFT JOIN FETCH p.tipoPrenda " +
+                "WHERE c.id = :idCategoria",
+                Producto.class
+            )
+            .setParameter("idCategoria", idCategoria)
+            .getResultList();
+
+            for (Producto producto : productos) {
+                if (producto.getTallas() != null) {
+                    producto.getTallas().size();
+                }
+            }
+
+            return productos;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Producto> buscarProductos(String criterio) {
+        if (criterio == null || criterio.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        EntityManager em = conexion.getEntityManager();
+        try {
+            String patron = "%" + criterio.trim().toLowerCase() + "%";
+
+            List<Producto> productos = em.createQuery(
+                "SELECT DISTINCT p FROM Producto p " +
+                "LEFT JOIN FETCH p.categorias " +
+                "LEFT JOIN FETCH p.tipoPrenda " +
+                "WHERE LOWER(p.nombre) LIKE :patron " +
+                "OR LOWER(p.sku) LIKE :patron " +
+                "OR LOWER(p.codigoBarras) LIKE :patron",
+                Producto.class
+            )
+            .setParameter("patron", patron)
+            .getResultList();
+
+            for (Producto producto : productos) {
+                if (producto.getTallas() != null) {
+                    producto.getTallas().size();
+                }
+            }
+
+            return productos;
+        } finally {
+            em.close();
         }
     }
 }
