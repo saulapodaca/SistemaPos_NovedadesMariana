@@ -1,4 +1,3 @@
-
 package implementaciones;
 
 import dominio.Producto;
@@ -27,11 +26,12 @@ public class ProductoTallaDAOTest {
         productoTallaDAO = new ProductoTallaDAO();
         productoDAO = new ProductoDAO();
 
-        String codigo = UUID.randomUUID().toString();
+        String codigo = UUID.randomUUID().toString().substring(0, 8);
 
-        // Crear producto para las pruebas
+        // Crear producto para las pruebas con los 6 parámetros (incluyendo código de barras)
         productoPrueba = new Producto(
             "SKU-PT-" + codigo,
+            "CB-PT-" + codigo,
             "Camisa de prueba",
             "Producto para pruebas de tallas",
             250.0f,

@@ -1,4 +1,3 @@
-
 package implementaciones;
 
 import dominio.DetalleVenta;
@@ -71,9 +70,10 @@ public class VentaDAOTest {
         usuarioDAO.guardar(usuarioPrueba);
         idUsuario = usuarioPrueba.getId();
 
-        // Crear producto de prueba
+        // Crear producto de prueba con los 6 parámetros (incluyendo código de barras)
         productoPrueba = new Producto(
             "CAM-" + codigo,
+            "CB-V-" + codigo, // Código de barras obligatorio
             "Camisa Nike",
             "Camisa de prueba",
             500.0f,

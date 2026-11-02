@@ -1,4 +1,3 @@
-
 package implementaciones;
 
 import dominio.Categoria;
@@ -21,11 +20,11 @@ public class ProductoDAOTest {
     private static Long idPrueba;
     private static Long idCategoria;
     private static String skuPrueba;
+    private static String codigoBarrasPrueba;
     private static Categoria categoriaPrueba;
 
     @BeforeAll
     public static void setUp() throws Exception {
-
         productoDAO = new ProductoDAO();
         categoriaDAO = new CategoriaDAO();
 
@@ -33,6 +32,7 @@ public class ProductoDAOTest {
                 .toString().substring(0, 8);
 
         skuPrueba = "SKU-TEST-" + codigo;
+        codigoBarrasPrueba = "CB-" + codigo;
 
         // Crear categoria de prueba
         categoriaPrueba = new Categoria(
@@ -48,9 +48,10 @@ public class ProductoDAOTest {
     @Test
     @Order(1)
     public void testGuardar() throws Exception {
-
+        // Se incluyen los 6 parámetros requeridos por el constructor de Producto
         Producto producto = new Producto(
             skuPrueba,
+            codigoBarrasPrueba,
             "Pantalon Mezclilla",
             "Pantalon azul clasico",
             450.00f,
@@ -83,6 +84,7 @@ public class ProductoDAOTest {
         assertNotNull(guardado);
 
         assertEquals(skuPrueba, guardado.getSku());
+        assertEquals(codigoBarrasPrueba, guardado.getCodigoBarras());
 
         assertEquals(
             TipoPrenda.PANTALON,
@@ -97,7 +99,6 @@ public class ProductoDAOTest {
     @Test
     @Order(2)
     public void testBuscarPorId() {
-
         assertNotNull(idPrueba);
 
         Producto producto = productoDAO.buscarPorId(idPrueba);
@@ -108,6 +109,7 @@ public class ProductoDAOTest {
         );
 
         assertEquals(skuPrueba, producto.getSku());
+        assertEquals(codigoBarrasPrueba, producto.getCodigoBarras());
 
         assertEquals(
             "Pantalon Mezclilla",
@@ -148,7 +150,6 @@ public class ProductoDAOTest {
     @Test
     @Order(3)
     public void testActualizar() throws Exception {
-
         Producto producto = productoDAO.buscarPorId(idPrueba);
 
         assertNotNull(producto);
@@ -186,7 +187,6 @@ public class ProductoDAOTest {
     @Test
     @Order(4)
     public void testObtenerTodos() {
-
         List<Producto> productos =
                 productoDAO.obtenerTodos();
 
@@ -203,7 +203,6 @@ public class ProductoDAOTest {
     @Test
     @Order(5)
     public void testEliminar() throws Exception {
-
         assertNotNull(idPrueba);
 
         productoDAO.eliminar(idPrueba);
@@ -219,11 +218,9 @@ public class ProductoDAOTest {
 
     @AfterAll
     public static void limpiarDatos() throws Exception {
-
         try {
             // Eliminar producto si alguna prueba fallo
             if (idPrueba != null) {
-
                 Producto producto =
                         productoDAO.buscarPorId(idPrueba);
 
@@ -231,12 +228,9 @@ public class ProductoDAOTest {
                     productoDAO.eliminar(idPrueba);
                 }
             }
-
         } finally {
-
             // Eliminar categoria de prueba
             if (idCategoria != null) {
-
                 Categoria categoria =
                         categoriaDAO.buscarPorId(idCategoria);
 

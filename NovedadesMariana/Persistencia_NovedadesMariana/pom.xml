@@ -39,7 +39,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <properties>
-        <exec.mainClass>com.itson.persistencia_novedadesmariana.Persistencia_NovedadesMariana</exec.mainClass>
-    </properties>
 </project>
