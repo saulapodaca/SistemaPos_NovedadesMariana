@@ -18,6 +18,7 @@ public interface IProductoBO {
     public List<ProductoDTO> obtenerTodos();
     ProductoDTO obtenerPorId(Long id);
     ProductoDTO obtenerPorSku(String sku);
+    ProductoDTO obtenerPorCodigoBarras(String codigoBarras);
     List<ProductoDTO> listarProductosPorCategoria(Long idCategoria);
     List<ProductoDTO> buscarProductos(String criterio);
 }

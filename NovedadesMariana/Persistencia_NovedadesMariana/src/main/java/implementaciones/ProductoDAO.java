@@ -4,6 +4,7 @@ package implementaciones;
 import dominio.Categoria;
 import dominio.Producto;
 import dominio.ProductoTalla;
+import dtos.ProductoDTO;
 import entityManager.ConexionJPA;
 import interfaces.IProductoDAO;
 import jakarta.persistence.EntityManager;
@@ -13,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ProductoDAO implements IProductoDAO {
+public class ProductoDAO implements IProductoDAO{
 
     private final ConexionJPA conexion = ConexionJPA.getInstance();
 
@@ -210,7 +211,7 @@ public class ProductoDAO implements IProductoDAO {
     }
 
     @Override
-    public Producto buscarPorId(Long id) {
+    public Producto buscarProductoPorId(Long id) {
         EntityManager em = conexion.getEntityManager();
 
         try {
@@ -337,7 +338,7 @@ public class ProductoDAO implements IProductoDAO {
     }
     
     @Override
-    public Producto obtenerPorSku(String sku) {
+    public Producto buscarPorSku(String sku) {
         if (sku == null || sku.isBlank()) {
             return null;
         }
@@ -347,7 +348,6 @@ public class ProductoDAO implements IProductoDAO {
             Producto producto = em.createQuery(
                 "SELECT DISTINCT p FROM Producto p " +
                 "LEFT JOIN FETCH p.categorias " +
-                "LEFT JOIN FETCH p.tipoPrenda " +
                 "WHERE LOWER(p.sku) = LOWER(:sku)",
                 Producto.class
             )
@@ -368,6 +368,29 @@ public class ProductoDAO implements IProductoDAO {
     }
 
     @Override
+    public Producto buscarPorCodigoBarras(String codigoBarras) {
+        if (codigoBarras == null || codigoBarras.isBlank()) {
+            return null;
+        }
+
+        EntityManager em = conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT DISTINCT p FROM Producto p " +
+                "LEFT JOIN FETCH p.categorias " +
+                "WHERE LOWER(p.codigoBarras) = LOWER(:codigo)",
+                Producto.class
+            )
+            .setParameter("codigo", codigoBarras.trim())
+            .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public List<Producto> listarProductosPorCategoria(Long idCategoria) {
         if (idCategoria == null || idCategoria <= 0) {
             return Collections.emptyList();
@@ -379,7 +402,6 @@ public class ProductoDAO implements IProductoDAO {
                 "SELECT DISTINCT p FROM Producto p " +
                 "JOIN p.categorias c " +
                 "LEFT JOIN FETCH p.categorias " +
-                "LEFT JOIN FETCH p.tipoPrenda " +
                 "WHERE c.id = :idCategoria",
                 Producto.class
             )
@@ -411,7 +433,6 @@ public class ProductoDAO implements IProductoDAO {
             List<Producto> productos = em.createQuery(
                 "SELECT DISTINCT p FROM Producto p " +
                 "LEFT JOIN FETCH p.categorias " +
-                "LEFT JOIN FETCH p.tipoPrenda " +
                 "WHERE LOWER(p.nombre) LIKE :patron " +
                 "OR LOWER(p.sku) LIKE :patron " +
                 "OR LOWER(p.codigoBarras) LIKE :patron",
@@ -431,4 +452,5 @@ public class ProductoDAO implements IProductoDAO {
             em.close();
         }
     }
+
 }

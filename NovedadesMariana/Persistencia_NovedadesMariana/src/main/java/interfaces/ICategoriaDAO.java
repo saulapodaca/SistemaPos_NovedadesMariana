@@ -15,6 +15,6 @@ public interface ICategoriaDAO {
     void guardar(Categoria categoria) throws Exception;
     void actualizar(Categoria categoria) throws Exception;
     void eliminar(Long id) throws Exception;
-    Categoria buscarPorId(Long id);
+    Categoria buscarCategoriaPorId(Long id);
     List<Categoria> obtenerTodas();
 }

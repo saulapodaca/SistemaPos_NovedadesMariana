@@ -9,17 +9,26 @@ import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Pruebas de integración para validar las operaciones CRUD de {@link IPagoDAO}.
+ * Los métodos se ejecutan en orden para reutilizar el pago creado.
+ */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PagoDAOTest {
 
+    /** DAO utilizado para persistir y consultar pagos. */
     private static IPagoDAO pagoDAO;
+
+    /** ID del pago de prueba, compartido entre los métodos de prueba. */
     private static Long idPrueba;
 
+    /** Inicializa la implementación del DAO antes de ejecutar las pruebas. */
     @BeforeAll
     public static void setUp() {
         pagoDAO = new PagoDAO();
     }
 
+    /** Guarda un pago y valida que sus datos principales queden persistidos. */
     @Test
     @Order(1)
     public void testGuardar() throws Exception {
@@ -34,6 +43,7 @@ public class PagoDAOTest {
 
         pagoDAO.guardar(pago);
 
+        // 🔴 BREAKPOINT 1: Inspeccionar el ID generado y los importes persistidos.
         assertNotNull(
             pago.getId(),
             "El pago debe generar un ID."
@@ -44,6 +54,14 @@ public class PagoDAOTest {
         Pago guardado = pagoDAO.buscarPorId(idPrueba);
 
         assertNotNull(guardado);
+        System.out.println("========================================");
+        System.out.println("💾 [TEST GUARDAR] Pago persistido:");
+        System.out.println("   - ID: " + guardado.getId());
+        System.out.println("   - Método: " + guardado.getMetodoPago());
+        System.out.println("   - Monto: $" + guardado.getMonto());
+        System.out.println("   - Recibido: $" + guardado.getMontoRecibido());
+        System.out.println("   - Cambio: $" + guardado.getCambio());
+        System.out.println("========================================");
 
         assertEquals(
             MetodoPago.EFECTIVO,
@@ -57,6 +75,7 @@ public class PagoDAOTest {
         );
     }
 
+    /** Busca el pago de prueba por ID y valida todos sus importes. */
     @Test
     @Order(2)
     public void testBuscarPorId() {
@@ -65,6 +84,15 @@ public class PagoDAOTest {
 
         Pago pago = pagoDAO.buscarPorId(idPrueba);
 
+        assertNotNull(pago, "El pago debe existir.");
+        System.out.println("========================================");
+        System.out.println("🔍 [TEST BUSCAR POR ID] Pago encontrado:");
+        System.out.println("   - ID: " + pago.getId());
+        System.out.println("   - Método: " + pago.getMetodoPago());
+        System.out.println("   - Monto: $" + pago.getMonto());
+        System.out.println("   - Recibido: $" + pago.getMontoRecibido());
+        System.out.println("   - Cambio: $" + pago.getCambio());
+        System.out.println("========================================");
         assertNotNull(
             pago,
             "El pago debe existir."
@@ -88,6 +116,7 @@ public class PagoDAOTest {
         );
     }
 
+    /** Actualiza los importes del pago y comprueba los valores recuperados. */
     @Test
     @Order(3)
     public void testActualizar() throws Exception {
@@ -103,9 +132,13 @@ public class PagoDAOTest {
 
         pagoDAO.actualizar(pago);
 
+        // 🔴 BREAKPOINT 2: Revisar los importes actualizados antes de las aserciones.
         Pago actualizado = pagoDAO.buscarPorId(idPrueba);
 
         assertNotNull(actualizado);
+        System.out.println("✏️ [TEST ACTUALIZAR] Pago: monto $" + actualizado.getMonto()
+                + " | recibido $" + actualizado.getMontoRecibido()
+                + " | cambio $" + actualizado.getCambio());
 
         assertEquals(
             550.0f,
@@ -126,14 +159,21 @@ public class PagoDAOTest {
         );
     }
 
+    /** Obtiene todos los pagos y verifica que incluya el pago de prueba. */
     @Test
     @Order(4)
     public void testObtenerTodos() {
 
         List<Pago> pagos = pagoDAO.obtenerTodos();
-
         assertNotNull(pagos);
 
+        System.out.println("========================================");
+        System.out.println("📋 [TEST OBTENER TODOS] Total de registros: " + pagos.size());
+        for (Pago p : pagos) {
+            System.out.println("   -> [" + p.getId() + "] " + p.getMetodoPago()
+                    + " | Monto: $" + p.getMonto());
+        }
+        System.out.println("========================================");
         assertTrue(
             pagos.stream().anyMatch(
                 p -> idPrueba.equals(p.getId())
@@ -142,6 +182,7 @@ public class PagoDAOTest {
         );
     }
 
+    /** Elimina el pago y valida que ya no pueda recuperarse por su ID. */
     @Test
     @Order(5)
     public void testEliminar() throws Exception {
@@ -150,14 +191,17 @@ public class PagoDAOTest {
 
         pagoDAO.eliminar(idPrueba);
 
+        // 🔴 BREAKPOINT 3: Confirmar el resultado de la búsqueda tras eliminar.
         Pago eliminado = pagoDAO.buscarPorId(idPrueba);
 
+        System.out.println("🗑️ [TEST ELIMINAR] Resultado de búsqueda: " + eliminado);
         assertNull(
             eliminado,
             "El pago debe haberse eliminado."
         );
     }
 
+    /** Limpia el pago si la ejecución no alcanzó testEliminar. */
     @AfterAll
     public static void limpiarDatos() throws Exception {
 

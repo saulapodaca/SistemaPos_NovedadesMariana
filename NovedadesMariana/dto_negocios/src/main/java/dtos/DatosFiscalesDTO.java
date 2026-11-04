@@ -4,11 +4,13 @@
  */
 package dtos;
 
+import interfaces.IDatosFiscalesDTO;
+
 /**
  *
  * @author saula
  */
-public class DatosFiscalesDTO {
+public class DatosFiscalesDTO implements IDatosFiscalesDTO {
     private String rfc;
     private String razonSocial;
     private String codigoPostal;

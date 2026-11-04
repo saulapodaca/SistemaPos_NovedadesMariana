@@ -2,62 +2,24 @@ package mappers;
 
 import dominio.Usuario;
 import dtos.UsuarioDTO;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * 
- */
-public class UsuarioMapper {
-
-    /**
-     * Convierte una entidad Usuario a UsuarioDTO.
-     */
+public final class UsuarioMapper {
+    private UsuarioMapper() { }
     public static UsuarioDTO toDTO(Usuario usuario) {
-        if (usuario == null) {
-            return null;
-        }
-
-        UsuarioDTO dto = new UsuarioDTO();
-        dto.setId(usuario.getId());
-        dto.setUsuario(usuario.getUsuario());
-        // Ajusta los getters/setters según los atributos reales de tu entidad y DTO
-        // dto.setNombre(usuario.getNombre());
-        // dto.setRol(usuario.getRol());
-
-        return dto;
+        if (usuario == null) return null;
+        return new UsuarioDTO(usuario.getId(), usuario.getUsuario(), usuario.getContrasenia(), usuario.getNombres(),
+                usuario.getPrimerApellido(), usuario.getSegundoApellido(), usuario.getRol() == null ? null : usuario.getRol().name());
     }
-
-    /**
-     * Convierte un objeto UsuarioDTO a la entidad Usuario.
-     */
     public static Usuario toEntity(UsuarioDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
+        if (dto == null) return null;
         Usuario usuario = new Usuario();
-        usuario.setId(dto.getId());
-        usuario.setUsuario(dto.getUsuario());
-        // Ajusta los getters/setters según tus atributos
-        // usuario.setNombre(dto.getNombre());
-        // usuario.setRol(dto.getRol());
-
+        usuario.setId(dto.getId()); usuario.setUsuario(dto.getUsuario()); usuario.setContrasenia(dto.getContrasenia());
+        usuario.setNombres(dto.getNombres()); usuario.setPrimerApellido(dto.getPrimerApellido()); usuario.setSegundoApellido(dto.getSegundoApellido());
+        if (dto.getRolEmpleado() != null && !dto.getRolEmpleado().isBlank()) usuario.setRol(dominio.RolEmpleado.valueOf(dto.getRolEmpleado()));
         return usuario;
     }
-
-    /**
-     * Convierte una lista de entidades Usuario a una lista de UsuarioDTO.
-     */
-    public static List<UsuarioDTO> toDTOList(List<Usuario> usuarios) {
-        if (usuarios == null) {
-            return new ArrayList<>();
-        }
-
-        List<UsuarioDTO> dtos = new ArrayList<>();
-        for (Usuario u : usuarios) {
-            dtos.add(toDTO(u));
-        }
-        return dtos;
+    public static java.util.List<UsuarioDTO> toDTOList(java.util.List<Usuario> items) {
+        return items == null ? java.util.Collections.emptyList()
+                : items.stream().map(UsuarioMapper::toDTO).collect(java.util.stream.Collectors.toList());
     }
 }

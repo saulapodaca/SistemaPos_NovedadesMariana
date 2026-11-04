@@ -1,26 +1,29 @@
 package bos;
 
-import dominio.Usuario;
 import dtos.UsuarioDTO;
-import implementaciones.UsuarioDAO;
 import interfaces.IUsuarioBO;
-import interfaces.IUsuarioDAO;
-import java.util.List;
+import fachada.FachadaPersistencia;
+import interfaces.IFachadaPersistencia;
 import mappers.UsuarioMapper;
+import java.util.List;
 
 /**
  * Business Object para la gestión de usuarios.
- * Integra validaciones de negocio y conversión DTO <-> Entidad mediante UsuarioMapper.
+ * Integra reglas de negocio y delega el acceso mediante el puerto de usuarios.
  * 
  * @author saula
  */
 public class UsuarioBO implements IUsuarioBO {
 
     private static UsuarioBO instance;
-    private final IUsuarioDAO usuarioDAO;
+    private final IFachadaPersistencia persistencia;
 
     private UsuarioBO() {
-        this.usuarioDAO = new UsuarioDAO();
+        this(FachadaPersistencia.getInstance());
+    }
+
+    public UsuarioBO(IFachadaPersistencia persistencia) {
+        this.persistencia = java.util.Objects.requireNonNull(persistencia);
     }
 
     public static synchronized UsuarioBO getInstance() {
@@ -35,28 +38,30 @@ public class UsuarioBO implements IUsuarioBO {
         validarTexto(usuario, "El nombre de usuario es obligatorio.");
         validarTexto(contrasenia, "La contraseña es obligatoria.");
 
-        Usuario usuarioEncontrado = usuarioDAO.buscarPorUsuario(usuario);
-        if (usuarioEncontrado == null) {
-            throw new Exception("El usuario no existe.");
+        UsuarioDTO usuarioEncontrado = UsuarioMapper.toDTO(persistencia.buscarUsuarioParaAutenticacion(usuario));
+        if (usuarioEncontrado == null
+                || !contrasenia.equals(usuarioEncontrado.getContrasenia())) {
+            return null;
         }
-
-        if (!contrasenia.equals(usuarioEncontrado.getContrasenia())) {
-            throw new Exception("Contraseña incorrecta.");
-        }
-
-        return UsuarioMapper.toDTO(usuarioEncontrado);
+        return new UsuarioDTO(usuarioEncontrado.getId(), usuarioEncontrado.getUsuario(),
+                null, usuarioEncontrado.getNombres(),
+                usuarioEncontrado.getPrimerApellido(),
+                usuarioEncontrado.getSegundoApellido(),
+                usuarioEncontrado.getRolEmpleado());
     }
 
     @Override
     public void guardar(UsuarioDTO usuarioDTO) throws Exception {
         validarUsuarioDTO(usuarioDTO);
 
-        if (usuarioDAO.buscarPorUsuario(usuarioDTO.getUsuario()) != null) {
-            throw new Exception("El nombre de usuario ya está registrado.");
+        if (usuarioDTO.getId() != null) {
+            throw new IllegalArgumentException("Un usuario nuevo no debe incluir un ID asignado.");
         }
 
-        Usuario entidad = UsuarioMapper.toEntity(usuarioDTO);
-        usuarioDAO.guardar(entidad);
+        if (persistencia.buscarUsuarioPorNombre(usuarioDTO.getUsuario()) != null) {
+            throw new Exception("El nombre de usuario ya está registrado.");
+        }
+        persistencia.guardarUsuario(UsuarioMapper.toEntity(usuarioDTO));
     }
 
     @Override
@@ -67,44 +72,44 @@ public class UsuarioBO implements IUsuarioBO {
             throw new IllegalArgumentException("El ID del usuario es requerido para actualizar.");
         }
 
-        Usuario existente = usuarioDAO.buscarPorId(usuarioDTO.getId());
+        UsuarioDTO existente = UsuarioMapper.toDTO(persistencia.buscarUsuarioPorId(usuarioDTO.getId()));
         if (existente == null) {
             throw new Exception("El usuario que intenta actualizar no existe.");
         }
-
-        Usuario entidad = UsuarioMapper.toEntity(usuarioDTO);
-        usuarioDAO.actualizar(entidad);
+        UsuarioDTO mismoNombre = UsuarioMapper.toDTO(persistencia.buscarUsuarioPorNombre(usuarioDTO.getUsuario()));
+        if (mismoNombre != null && !usuarioDTO.getId().equals(mismoNombre.getId())) {
+            throw new IllegalArgumentException("El nombre de usuario ya está registrado.");
+        }
+        persistencia.actualizarUsuario(UsuarioMapper.toEntity(usuarioDTO));
     }
 
     @Override
     public void eliminar(Long id) throws Exception {
         validarId(id);
 
-        Usuario existente = usuarioDAO.buscarPorId(id);
+        UsuarioDTO existente = UsuarioMapper.toDTO(persistencia.buscarUsuarioPorId(id));
         if (existente == null) {
             throw new Exception("El usuario que desea eliminar no existe.");
         }
 
-        usuarioDAO.eliminar(id);
+        persistencia.eliminarUsuario(id);
     }
 
     @Override
     public UsuarioDTO buscarPorId(Long id) throws Exception {
         validarId(id);
-        Usuario usuario = usuarioDAO.buscarPorId(id);
-        return UsuarioMapper.toDTO(usuario);
+        return UsuarioMapper.toDTO(persistencia.buscarUsuarioPorId(id));
     }
 
     @Override
     public List<UsuarioDTO> obtenerTodos() throws Exception {
-        List<Usuario> usuarios = usuarioDAO.obtenerTodos();
-        return UsuarioMapper.toDTOList(usuarios);
+        return UsuarioMapper.toDTOList(persistencia.obtenerUsuarios());
     }
 
     @Override
-    public Usuario buscarPorUsuario(String nombreUsuario) throws Exception {
+    public UsuarioDTO buscarPorUsuario(String nombreUsuario) throws Exception {
         validarTexto(nombreUsuario, "El nombre de usuario no puede estar vacío.");
-        return usuarioDAO.buscarPorUsuario(nombreUsuario);
+        return UsuarioMapper.toDTO(persistencia.buscarUsuarioPorNombre(nombreUsuario));
     }
 
     // =========================================================================

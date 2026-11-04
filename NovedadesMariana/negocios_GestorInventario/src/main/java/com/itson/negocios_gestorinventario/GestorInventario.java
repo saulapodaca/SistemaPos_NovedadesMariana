@@ -6,9 +6,9 @@ package com.itson.negocios_gestorinventario;
 
 import bos.ProductoBO;
 import bos.ProductoTallaBO;
-import dtos.ProductoDTO;
-import dtos.ProductoTallaDTO;
+import interfaces.IProductoDTO;
 import interfaces.IProductoBO;
+import interfaces.IProductoTallaDTO;
 import interfaces.IProductoTallaBO;
 import java.util.List;
 
@@ -25,22 +25,22 @@ public class GestorInventario implements IGestorInventario {
     }
 
     @Override
-    public ProductoDTO buscarProductoPorCodigo(String codigo) {
-        return this.productoBO.obtenerPorSku(codigo);
+    public IProductoDTO buscarProductoPorCodigo(String codigo) {
+        return this.productoBO.obtenerPorCodigoBarras(codigo);
     }
 
     @Override
-    public ProductoDTO obtenerProductoPorId(int id) {
-        return this.productoBO.obtenerPorId(id);
+    public IProductoDTO obtenerProductoPorId(int id) {
+        return this.productoBO.obtenerPorId((long) id);
     }
 
     @Override
-    public List<ProductoDTO> listarProductosPorCategoria(int idCategoria) {
-        return this.productoBO.listarProductosPorCategoria(idCategoria);
+    public List<? extends IProductoDTO> listarProductosPorCategoria(int idCategoria) {
+        return this.productoBO.listarProductosPorCategoria((long) idCategoria);
     }
 
     @Override
-    public List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto) {
+    public List<? extends IProductoTallaDTO> obtenerTallasPorProducto(int idProducto) {
         return this.productoTallaBO.obtenerTallasPorProducto(idProducto);
     }
 

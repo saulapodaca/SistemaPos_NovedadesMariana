@@ -15,9 +15,11 @@ public interface IProductoDAO {
     public void guardar(Producto producto) throws Exception;
     public void actualizar(Producto producto) throws Exception;
     public void eliminar(Long id) throws Exception;
-    public Producto buscarPorId(Long id);
+    public Producto buscarProductoPorId(Long id);
     public List<Producto> obtenerTodos();
-    public Producto obtenerPorSku(String sku);
+    public Producto buscarPorSku(String sku);
+    public Producto buscarPorCodigoBarras(String codigoBarras);
     public List<Producto> listarProductosPorCategoria(Long idCategoria);
     public List<Producto> buscarProductos(String criterio);
+    
 }

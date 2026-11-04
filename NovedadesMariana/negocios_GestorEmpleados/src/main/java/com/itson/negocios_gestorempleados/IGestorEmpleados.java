@@ -4,16 +4,16 @@
  */
 package com.itson.negocios_gestorempleados;
 
-import dtos.UsuarioDTO;
+import interfaces.IUsuarioDTO;
 
 /**
  *
  * @author saula
  */
 public interface IGestorEmpleados {
-    UsuarioDTO autenticar(String usuario, String contrasenia);
+    IUsuarioDTO autenticar(String usuario, String contrasenia);
 
-    UsuarioDTO obtenerPorId(int id);
+    IUsuarioDTO obtenerPorId(int id);
 
-    UsuarioDTO obtenerPorUsuario(String usuario);
+    IUsuarioDTO obtenerPorUsuario(String usuario);
 }

@@ -1,42 +1,65 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package mappers;
 
 import dominio.Categoria;
 import dominio.Producto;
 import dtos.ProductoDTO;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- *
- * @author ramonsebastianzamudioayala
- */
-public class ProductoMapper {
-    public static ProductoDTO toDTO(Producto producto){
-        Set<Long> categoriasIds = producto.getCategorias() == null 
-            ? new HashSet<>() 
-            : producto.getCategorias().stream()
-                    .map(Categoria::getId) 
-                    .collect(Collectors.toSet());
-        return new ProductoDTO(producto.getId(),producto.getCodigoBarras(), producto.getSku(), 
-                producto.getNombre(), producto.getDescripcion(), producto.getPrecio(),
-                TipoPrendaMapper.toDto(producto.getTipoPrenda()),categoriasIds);
+/** Conversiones entre Producto y el DTO usado por la capa de negocio. */
+public final class ProductoMapper {
+    private ProductoMapper() { }
+
+    public static ProductoDTO toDTO(Producto producto) {
+        if (producto == null) return null;
+        ProductoDTO dto = new ProductoDTO();
+        dto.setId(producto.getId());
+        dto.setSku(producto.getSku());
+        dto.setCodigoBarras(producto.getCodigoBarras());
+        dto.setNombre(producto.getNombre());
+        dto.setDescripcion(producto.getDescripcion());
+        dto.setPrecio(producto.getPrecio() == null ? 0f : producto.getPrecio());
+        if (producto.getTipoPrenda() != null) {
+            dto.setTipoPrenda(dtos.TipoPrendaDTO.valueOf(producto.getTipoPrenda().name()));
+        }
+        if (producto.getCategorias() != null) {
+            dto.setCategoriasIds(producto.getCategorias().stream()
+                    .map(Categoria::getId).filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toSet()));
+        }
+        return dto;
     }
-    
-    public static Producto toEntity(ProductoDTO dto, Set<Categoria> categorias) {
+
+    /** Las categorías se representan como referencias con ID; la persistencia debe resolverlas. */
+    public static Producto toEntity(ProductoDTO dto) {
+        if (dto == null) return null;
         Producto producto = new Producto();
         producto.setId(dto.getId());
-        producto.setCodigoBarras(dto.getCodigoBarras());
         producto.setSku(dto.getSku());
+        producto.setCodigoBarras(dto.getCodigoBarras());
         producto.setNombre(dto.getNombre());
         producto.setDescripcion(dto.getDescripcion());
         producto.setPrecio(dto.getPrecio());
-        producto.setTipoPrenda(TipoPrendaMapper.toEntity(dto.getTipoPrenda()));
-        producto.setCategorias(categorias != null ? categorias : new HashSet<>());
+        if (dto.getTipoPrenda() != null) {
+            producto.setTipoPrenda(dominio.TipoPrenda.valueOf(dto.getTipoPrenda().name()));
+        }
+        if (dto.getCategoriasIds() != null) {
+            for (Long id : dto.getCategoriasIds()) {
+                if (id != null) {
+                    Categoria categoria = new Categoria();
+                    categoria.setId(id);
+                    producto.agregarCategoria(categoria);
+                }
+            }
+        }
         return producto;
+    }
+
+    public static List<ProductoDTO> toDTOList(List<Producto> items) {
+        return items == null ? Collections.emptyList() : items.stream().map(ProductoMapper::toDTO).collect(Collectors.toList());
+    }
+    public static List<Producto> toEntityList(List<ProductoDTO> items) {
+        return items == null ? Collections.emptyList() : items.stream().map(ProductoMapper::toEntity).collect(Collectors.toList());
     }
 }

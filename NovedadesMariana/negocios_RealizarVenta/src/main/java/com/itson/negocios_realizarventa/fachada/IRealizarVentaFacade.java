@@ -29,6 +29,7 @@ public interface IRealizarVentaFacade {
     List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto);
     boolean validarStockDisponible(int idProductoTalla, int cantidad);
     ResumenVentaDTO calcularTotales(List<DetalleVentaDTO> detalles, float descuento);
+    float calcularCambio(float totalVenta, float montoRecibido);
 
     // Consultas de sesión y ventas
     UsuarioDTO autenticarUsuario(String usuario, String contrasenia);

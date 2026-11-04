@@ -6,11 +6,12 @@ package dtos;
 
 import java.util.HashSet;
 import java.util.Set;
+import interfaces.IProductoDTO;
 /**
  *
  * @author saula
  */
-public class ProductoDTO {
+public class ProductoDTO implements IProductoDTO {
     private Long id;
     private String codigoBarras;
     private String sku;

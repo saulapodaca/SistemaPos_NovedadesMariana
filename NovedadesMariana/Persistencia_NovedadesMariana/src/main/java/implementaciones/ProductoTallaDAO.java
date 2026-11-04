@@ -3,6 +3,7 @@ package implementaciones;
 
 import dominio.Producto;
 import dominio.ProductoTalla;
+import dtos.ProductoTallaDTO;
 import entityManager.ConexionJPA;
 import interfaces.IProductoTallaDAO;
 import jakarta.persistence.EntityManager;
@@ -181,7 +182,7 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
     }
 
     @Override
-    public ProductoTalla buscarPorId(Long id) {
+    public ProductoTalla buscarProductoTallaPorId(Long id) {
         EntityManager em = conexion.getEntityManager();
 
         try {
@@ -221,6 +222,29 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
         }
     }
 
+    @Override
+    public List<ProductoTalla> obtenerPorProducto(Long idProducto) {
+        if (idProducto == null || idProducto <= 0) {
+            throw new IllegalArgumentException(
+                "El ID del producto debe ser mayor a cero."
+            );
+        }
+
+        EntityManager em = conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT pt FROM ProductoTalla pt " +
+                "JOIN FETCH pt.producto p " +
+                "WHERE p.id = :idProducto",
+                ProductoTalla.class
+            )
+            .setParameter("idProducto", idProducto)
+            .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
     // Validaciones basicas
     private void validarProductoTalla(ProductoTalla productoTalla) {
 
@@ -245,4 +269,5 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
             );
         }
     }
+
 }

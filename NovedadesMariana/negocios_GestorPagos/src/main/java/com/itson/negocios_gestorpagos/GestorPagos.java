@@ -6,6 +6,7 @@ package com.itson.negocios_gestorpagos;
 
 import bos.PagoBO;
 import dtos.PagoDTO;
+import interfaces.IPagoDTO;
 import interfaces.IPagoBO;
 import java.util.List;
 
@@ -21,8 +22,14 @@ public class GestorPagos implements IGestorPagos {
     }
 
     @Override
-    public PagoDTO registrarPago(PagoDTO pago) {
-        return this.pagoBO.registrarPago(pago);
+    public IPagoDTO registrarPago(IPagoDTO pago) {
+        if (pago == null) {
+            return this.pagoBO.registrarPago(null);
+        }
+        PagoDTO pagoAdaptado = new PagoDTO(
+                pago.getId(), pago.getIdVenta(), pago.getMetodoPago(), pago.getMonto(),
+                pago.getMontoRecibido(), pago.getCambio(), pago.getFechaHora());
+        return this.pagoBO.registrarPago(pagoAdaptado);
     }
 
     @Override
@@ -31,7 +38,7 @@ public class GestorPagos implements IGestorPagos {
     }
 
     @Override
-    public List<PagoDTO> obtenerPagosPorVenta(int idVenta) {
+    public List<? extends IPagoDTO> obtenerPagosPorVenta(int idVenta) {
         return this.pagoBO.obtenerPagosPorVenta(idVenta);
     }
 }

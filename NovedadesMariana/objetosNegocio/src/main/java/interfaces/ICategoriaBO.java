@@ -4,7 +4,6 @@
  */
 package interfaces;
 
-import dominio.Categoria;
 import dtos.CategoriaDTO;
 import java.util.List;
 

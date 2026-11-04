@@ -17,8 +17,10 @@ public interface IVentaDAO {
     void guardar(Venta venta) throws Exception;
     void actualizar(Venta venta) throws Exception;
     void eliminar(Long id) throws Exception;
-    Venta buscarPorId(Long id);
+    Venta buscarVentaPorId(Long id);
+    Venta buscarPorFolio(String folio);
     List<Venta> obtenerTodas();
+    boolean cancelar(Long id) throws Exception;
     void guardarConTallas(
     Venta venta, Map<DetalleVenta, Long> tallasPorDetalle) throws Exception;
 }

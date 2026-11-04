@@ -20,7 +20,7 @@
     </properties>
   </persistence-unit>
 
-  <!-- Unidad de persistencia exclusiva para Tests (Base de datos limpia y automática) -->
+  <!-- Unidad de persistencia de pruebas, sin generar ni borrar el esquema. -->
   <persistence-unit name="com.itson_Dominio_NovedadesMariana_jar_1.0-SNAPSHOTPU_Test" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>dominio.Categoria</class>
@@ -35,8 +35,7 @@
       <property name="jakarta.persistence.jdbc.user" value="root"/>
       <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
       <property name="jakarta.persistence.jdbc.password" value="itson"/>
-      <!-- Borra y crea las tablas automáticamente cada vez que arranca la factoría -->
-      <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
+      <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
     </properties>
   </persistence-unit>
 

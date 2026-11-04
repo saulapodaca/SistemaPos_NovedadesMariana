@@ -5,12 +5,13 @@
 package dtos;
 
 import java.time.LocalDateTime;
+import interfaces.IPagoDTO;
 
 /**
  *
  * @author saula
  */
-public class PagoDTO {
+public class PagoDTO implements IPagoDTO {
     private int id;
     private int idVenta;
     private String metodoPago; // EFECTIVO, TARJETA, TRANSFERENCIA

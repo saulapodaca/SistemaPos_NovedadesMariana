@@ -16,5 +16,6 @@ public interface IPagoDAO {
     void actualizar(Pago pago) throws Exception;
     void eliminar(Long id) throws Exception;
     Pago buscarPorId(Long id);
+    Pago buscarPorVenta(Long idVenta);
     List<Pago> obtenerTodos();
 }

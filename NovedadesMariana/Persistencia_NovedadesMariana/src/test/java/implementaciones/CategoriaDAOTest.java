@@ -66,6 +66,12 @@ public class CategoriaDAOTest {
                 categoria.getId(),
                 "El ID no debe ser nulo despues de guardar."
         );
+        System.out.println("========================================");
+        System.out.println("💾 [TEST GUARDAR] Categoría creada:");
+        System.out.println("   - ID: " + categoria.getId());
+        System.out.println("   - Nombre: " + categoria.getNombre());
+        System.out.println("   - Descripción: " + categoria.getDescripcion());
+        System.out.println("========================================");
         idPrueba = categoria.getId();
     }
 
@@ -78,17 +84,15 @@ public class CategoriaDAOTest {
     @Order(2)
     public void testBuscarPorId() {
         assertNotNull(idPrueba);
-        Categoria categoria = categoriaDAO.buscarPorId(idPrueba);
+        // CORREGIDO: Se usa buscarCategoriaPorId según la interfaz
+        Categoria categoria = categoriaDAO.buscarCategoriaPorId(idPrueba);
+        assertNotNull(categoria, "La categoría debe existir.");
         System.out.println("========================================");
         System.out.println("🔍 [TEST BUSCAR POR ID] Categoría encontrada:");
         System.out.println("   - ID: " + categoria.getId());
         System.out.println("   - Nombre: " + categoria.getNombre());
         System.out.println("   - Descripción: " + categoria.getDescripcion());
         System.out.println("========================================");
-        assertNotNull(
-                categoria,
-                "La categoria debe existir."
-        );
         assertEquals(
                 nombrePrueba,
                 categoria.getNombre()
@@ -106,15 +110,21 @@ public class CategoriaDAOTest {
     @Test
     @Order(3)
     public void testActualizar() throws Exception {
-        Categoria categoria = categoriaDAO.buscarPorId(idPrueba);
+        // CORREGIDO: Se usa buscarCategoriaPorId
+        Categoria categoria = categoriaDAO.buscarCategoriaPorId(idPrueba);
         assertNotNull(categoria);
         categoria.setDescripcion(
                 "Coleccion actualizada"
         );
         categoriaDAO.actualizar(categoria);
         // 🔴 BREAKPOINT 2: Coloca el punto de interrupción aquí.
-        Categoria actualizada = categoriaDAO.buscarPorId(idPrueba);
+        // CORREGIDO: Se usa buscarCategoriaPorId
+        Categoria actualizada = categoriaDAO.buscarCategoriaPorId(idPrueba);
         assertNotNull(actualizada);
+        System.out.println("✏️ [TEST ACTUALIZAR] Categoría consultada:");
+        System.out.println("   - ID: " + actualizada.getId());
+        System.out.println("   - Nombre: " + actualizada.getNombre());
+        System.out.println("   - Descripción: " + actualizada.getDescripcion());
         assertEquals(
                 "Coleccion actualizada",
                 actualizada.getDescripcion()
@@ -130,13 +140,13 @@ public class CategoriaDAOTest {
     @Order(4)
     public void testObtenerTodos() {
         List<Categoria> categorias = categoriaDAO.obtenerTodas();
+        assertNotNull(categorias);
         System.out.println("========================================");
         System.out.println("📋 [TEST OBTENER TODOS] Total de registros: " + categorias.size());
         for (Categoria c : categorias) {
             System.out.println("   -> [" + c.getId() + "] " + c.getNombre() + " (" + c.getDescripcion() + ")");
         }
         System.out.println("========================================");
-        assertNotNull(categorias);
         assertTrue(
                 categorias.stream().anyMatch(
                         c -> c.getId().equals(idPrueba)
@@ -157,8 +167,10 @@ public class CategoriaDAOTest {
     public void testEliminar() throws Exception {
         assertNotNull(idPrueba);
         categoriaDAO.eliminar(idPrueba);
-        // 🔴 BREAKPOINT 3: Coloca el punto de interrupción aquí en NetBeans.s.
-        Categoria eliminada = categoriaDAO.buscarPorId(idPrueba);
+        // 🔴 BREAKPOINT 3: Coloca el punto de interrupción aquí en NetBeans.
+        // CORREGIDO: Se usa buscarCategoriaPorId
+        Categoria eliminada = categoriaDAO.buscarCategoriaPorId(idPrueba);
+        System.out.println("🗑️ [TEST ELIMINAR] Resultado de búsqueda: " + eliminada);
         assertNull(
                 eliminada,
                 "La categoria ya no debe existir."

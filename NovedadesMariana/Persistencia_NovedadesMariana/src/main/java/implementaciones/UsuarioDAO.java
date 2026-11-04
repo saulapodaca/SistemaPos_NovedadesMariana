@@ -2,12 +2,13 @@
 package implementaciones;
 
 import dominio.Usuario;
+import dtos.UsuarioDTO;
 import entityManager.ConexionJPA;
 import interfaces.IUsuarioDAO;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 
-public class UsuarioDAO implements IUsuarioDAO {
+public class UsuarioDAO implements IUsuarioDAO{
 
     private final ConexionJPA conexion = ConexionJPA.getInstance();
 
@@ -269,4 +270,6 @@ public class UsuarioDAO implements IUsuarioDAO {
             );
         }
     }
+
+
 }

@@ -4,15 +4,13 @@
  */
 package bos;
 
-import dominio.Categoria;
 import dtos.CategoriaDTO;
-import implementaciones.CategoriaDAO;
 import interfaces.ICategoriaBO;
-import interfaces.ICategoriaDAO;
+import fachada.FachadaPersistencia;
+import interfaces.IFachadaPersistencia;
+import mappers.CategoriaMapper;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import mappers.CategoriaMapper;
 
 /**
  *
@@ -21,10 +19,14 @@ import mappers.CategoriaMapper;
 public class CategoriaBO implements ICategoriaBO {
 
     private static CategoriaBO instance;
-    private final ICategoriaDAO categoriaDAO;
+    private final IFachadaPersistencia persistencia;
 
     private CategoriaBO() {
-        categoriaDAO = new CategoriaDAO();
+        this(FachadaPersistencia.getInstance());
+    }
+
+    public CategoriaBO(IFachadaPersistencia persistencia) {
+        this.persistencia = java.util.Objects.requireNonNull(persistencia);
     }
 
     public static synchronized CategoriaBO getInstance() {
@@ -38,14 +40,13 @@ public class CategoriaBO implements ICategoriaBO {
     public void guardar(CategoriaDTO categoriaDTO) throws Exception {
         validarCategoria(categoriaDTO);
 
-        if (categoriaDTO.getId() != null && categoriaDTO.getId() > 0) {
+        if (categoriaDTO.getId() != null) {
             throw new IllegalArgumentException("Una categoría nueva no debe incluir un ID.");
         }
 
         validarNombreUnico(categoriaDTO.getNombre(), null);
 
-        Categoria categoria = CategoriaMapper.toEntity(categoriaDTO);
-        categoriaDAO.guardar(categoria);
+        persistencia.guardarCategoria(CategoriaMapper.toEntity(categoriaDTO));
     }
 
     @Override
@@ -63,8 +64,7 @@ public class CategoriaBO implements ICategoriaBO {
 
         validarNombreUnico(categoriaDTO.getNombre(), categoriaDTO.getId());
 
-        Categoria categoria = CategoriaMapper.toEntity(categoriaDTO);
-        categoriaDAO.actualizar(categoria);
+        persistencia.actualizarCategoria(CategoriaMapper.toEntity(categoriaDTO));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CategoriaBO implements ICategoriaBO {
             throw new IllegalArgumentException("No se puede eliminar: la categoría con ID " + id + " no existe.");
         }
 
-        categoriaDAO.eliminar(id);
+        persistencia.eliminarCategoria(id);
     }
 
     @Override
@@ -87,8 +87,7 @@ public class CategoriaBO implements ICategoriaBO {
             throw new IllegalArgumentException("El ID de la categoría debe ser un número entero positivo.");
         }
 
-        Categoria categoria = categoriaDAO.buscarPorId(id);
-        return categoria != null ? CategoriaMapper.toDto(categoria) : null;
+        return CategoriaMapper.toDTO(persistencia.buscarCategoriaPorId(id));
     }
 
     @Override
@@ -104,14 +103,11 @@ public class CategoriaBO implements ICategoriaBO {
 
     @Override
     public List<CategoriaDTO> obtenerTodas() {
-        List<Categoria> categorias = categoriaDAO.obtenerTodas();
+        List<CategoriaDTO> categorias = CategoriaMapper.toDTOList(persistencia.obtenerCategorias());
         if (categorias == null || categorias.isEmpty()) {
             return Collections.emptyList();
         }
-
-        return categorias.stream()
-                .map(CategoriaMapper::toDto)
-                .collect(Collectors.toList());
+        return categorias;
     }
 
 
@@ -134,13 +130,13 @@ public class CategoriaBO implements ICategoriaBO {
      * Comprueba que no exista otra categoría registrada con el mismo nombre.
      */
     private void validarNombreUnico(String nombre, Long idActual) {
-        List<Categoria> todas = categoriaDAO.obtenerTodas();
+        List<CategoriaDTO> todas = CategoriaMapper.toDTOList(persistencia.obtenerCategorias());
         if (todas == null || todas.isEmpty()) {
             return;
         }
 
         String nombreLimpio = nombre.trim();
-        for (Categoria cat : todas) {
+        for (CategoriaDTO cat : todas) {
             boolean mismoNombre = cat.getNombre() != null && cat.getNombre().trim().equalsIgnoreCase(nombreLimpio);
             boolean esMismoRegistro = idActual != null && idActual.equals(cat.getId());
 

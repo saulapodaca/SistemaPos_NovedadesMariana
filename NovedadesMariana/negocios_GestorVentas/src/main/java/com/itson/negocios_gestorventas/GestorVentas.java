@@ -6,9 +6,12 @@ package com.itson.negocios_gestorventas;
 
 import bos.VentaBO;
 import dtos.DetalleVentaDTO;
-import dtos.ResumenVentaDTO;
 import dtos.VentaDTO;
+import interfaces.IDetalleVentaDTO;
+import interfaces.IResumenVentaDTO;
+import interfaces.IVentaDTO;
 import interfaces.IVentaBO;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,23 +26,41 @@ public class GestorVentas implements IGestorVentas {
     }
 
     @Override
-    public VentaDTO registrarVenta(VentaDTO venta) {
-        return this.ventaBO.registrarVenta(venta);
+    public IVentaDTO registrarVenta(IVentaDTO venta) {
+        if (venta == null) {
+            return this.ventaBO.registrarVenta(null);
+        }
+        VentaDTO ventaAdaptada = new VentaDTO(
+                venta.getId(), venta.getFolio(), venta.getFechaHora(),
+                venta.getSubtotal(), venta.getIva(), venta.getTotal(),
+                venta.getIdUsuario(), venta.getDetalles(), venta.getPagos());
+        return this.ventaBO.registrarVenta(ventaAdaptada);
     }
 
     @Override
-    public VentaDTO obtenerVentaPorId(int id) {
+    public IVentaDTO obtenerVentaPorId(int id) {
         return this.ventaBO.obtenerPorId(id);
     }
 
     @Override
-    public VentaDTO obtenerVentaPorFolio(String folio) {
+    public IVentaDTO obtenerVentaPorFolio(String folio) {
         return this.ventaBO.obtenerPorFolio(folio);
     }
 
     @Override
-    public ResumenVentaDTO calcularTotales(List<DetalleVentaDTO> detalles, float descuento) {
-        return this.ventaBO.calcularTotales(detalles, descuento);
+    public IResumenVentaDTO calcularTotales(
+            List<? extends IDetalleVentaDTO> detalles, float descuento) {
+        if (detalles == null) {
+            return this.ventaBO.calcularTotales(null, descuento);
+        }
+        List<DetalleVentaDTO> detallesAdaptados = new ArrayList<>();
+        for (IDetalleVentaDTO detalle : detalles) {
+            detallesAdaptados.add(detalle == null ? null : new DetalleVentaDTO(
+                    detalle.getId(), detalle.getIdVenta(), detalle.getIdProductoTalla(),
+                    detalle.getNombreProducto(), detalle.getTalla(), detalle.getCantidad(),
+                    detalle.getPrecioUnitario(), detalle.getSubtotal()));
+        }
+        return this.ventaBO.calcularTotales(detallesAdaptados, descuento);
     }
 
     @Override

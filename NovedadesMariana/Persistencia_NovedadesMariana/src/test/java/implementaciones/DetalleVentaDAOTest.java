@@ -151,6 +151,15 @@ public class DetalleVentaDAOTest {
         detalleVentaDAO.guardar(detalle);   
         // 🔴 BREAKPOINT 1: Coloca el punto de interrupción aquí
         assertNotNull(detalle.getId(), "El detalle debe generar un ID.");
+        System.out.println("========================================");
+        System.out.println("💾 [TEST GUARDAR] Detalle de venta creado:");
+        System.out.println("   - ID: " + detalle.getId());
+        System.out.println("   - Venta: " + detalle.getVenta().getFolio());
+        System.out.println("   - Producto: " + detalle.getProducto().getNombre());
+        System.out.println("   - Cantidad: " + detalle.getCantidad());
+        System.out.println("   - Precio unitario: $" + detalle.getPrecioUnitario());
+        System.out.println("   - Subtotal: $" + detalle.getSubtotal());
+        System.out.println("========================================");
         idPrueba = detalle.getId();
     }
 
@@ -163,6 +172,7 @@ public class DetalleVentaDAOTest {
     public void testBuscarPorId() {
         assertNotNull(idPrueba);
         DetalleVenta detalle = detalleVentaDAO.buscarPorId(idPrueba);
+        assertNotNull(detalle, "El detalle debe existir.");
         System.out.println("========================================");
         System.out.println("🔍 [TEST BUSCAR POR ID] Detalle de Venta encontrado:");
         System.out.println("   - ID: " + detalle.getId());
@@ -170,7 +180,6 @@ public class DetalleVentaDAOTest {
         System.out.println("   - Precio Unitario: " + detalle.getPrecioUnitario());
         System.out.println("   - Subtotal: " + detalle.getSubtotal());
         System.out.println("========================================");
-        assertNotNull(detalle, "El detalle debe existir.");
         assertEquals(2, detalle.getCantidad());
         assertEquals(250.0f, detalle.getPrecioUnitario(), 0.001f);
         assertEquals(500.0f, detalle.getSubtotal(), 0.001f);
@@ -193,6 +202,11 @@ public class DetalleVentaDAOTest {
         // 🔴 BREAKPOINT 2: Coloca el punto de interrupción aquí.
         DetalleVenta actualizado = detalleVentaDAO.buscarPorId(idPrueba);
         assertNotNull(actualizado);
+        System.out.println("✏️ [TEST ACTUALIZAR] Detalle consultado:");
+        System.out.println("   - ID: " + actualizado.getId());
+        System.out.println("   - Cantidad: " + actualizado.getCantidad());
+        System.out.println("   - Precio unitario: $" + actualizado.getPrecioUnitario());
+        System.out.println("   - Subtotal: $" + actualizado.getSubtotal());
         assertEquals(3, actualizado.getCantidad());
         assertEquals(750.0f, actualizado.getSubtotal(), 0.001f);
     }
@@ -205,13 +219,13 @@ public class DetalleVentaDAOTest {
     @Order(4)
     public void testObtenerTodos() {
         List<DetalleVenta> detalles = detalleVentaDAO.obtenerTodos();
+        assertNotNull(detalles);
         System.out.println("========================================");
         System.out.println("📋 [TEST OBTENER TODOS] Total de registros: " + detalles.size());
         for (DetalleVenta d : detalles) {
             System.out.println("   -> [" + d.getId() + "] Cantidad: " + d.getCantidad() + " - Subtotal: $" + d.getSubtotal());
         }
         System.out.println("========================================");
-        assertNotNull(detalles);
         assertTrue(
                 detalles.stream().anyMatch(d -> idPrueba.equals(d.getId())),
                 "La lista debe contener el detalle registrado."
@@ -231,6 +245,7 @@ public class DetalleVentaDAOTest {
         detalleVentaDAO.eliminar(idPrueba);
         // 🔴 BREAKPOINT 3: Coloca el punto de interrupción aquí.
         DetalleVenta eliminado = detalleVentaDAO.buscarPorId(idPrueba);
+        System.out.println("🗑️ [TEST ELIMINAR] Resultado de búsqueda: " + eliminado);
         assertNull(eliminado, "El detalle debe haberse eliminado.");
     }
 

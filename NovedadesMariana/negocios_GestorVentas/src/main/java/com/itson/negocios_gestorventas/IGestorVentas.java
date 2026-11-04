@@ -4,9 +4,9 @@
  */
 package com.itson.negocios_gestorventas;
 
-import dtos.DetalleVentaDTO;
-import dtos.ResumenVentaDTO;
-import dtos.VentaDTO;
+import interfaces.IDetalleVentaDTO;
+import interfaces.IResumenVentaDTO;
+import interfaces.IVentaDTO;
 import java.util.List;
 
 /**
@@ -14,13 +14,14 @@ import java.util.List;
  * @author saula
  */
 public interface IGestorVentas {
-    VentaDTO registrarVenta(VentaDTO venta);
+    IVentaDTO registrarVenta(IVentaDTO venta);
 
-    VentaDTO obtenerVentaPorId(int id);
+    IVentaDTO obtenerVentaPorId(int id);
 
-    VentaDTO obtenerVentaPorFolio(String folio);
+    IVentaDTO obtenerVentaPorFolio(String folio);
 
-    ResumenVentaDTO calcularTotales(List<DetalleVentaDTO> detalles, float descuento);
+    IResumenVentaDTO calcularTotales(
+            List<? extends IDetalleVentaDTO> detalles, float descuento);
 
     boolean cancelarVenta(int idVenta);
 }

@@ -15,6 +15,7 @@ public interface IProductoTallaDAO {
     void guardar(ProductoTalla productoTalla) throws Exception;
     void actualizar(ProductoTalla productoTalla) throws Exception;
     void eliminar(Long id) throws Exception;
-    ProductoTalla buscarPorId(Long id);
+    ProductoTalla buscarProductoTallaPorId(Long id);
     List<ProductoTalla> obtenerTodos();
+    List<ProductoTalla> obtenerPorProducto(Long idProducto);
 }

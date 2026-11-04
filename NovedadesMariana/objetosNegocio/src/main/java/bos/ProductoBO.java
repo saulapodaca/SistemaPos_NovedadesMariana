@@ -4,20 +4,13 @@
  */
 package bos;
 
-import dominio.Categoria;
-import dominio.Producto;
 import dtos.ProductoDTO;
-import implementaciones.CategoriaDAO;
-import implementaciones.ProductoDAO;
-import interfaces.ICategoriaDAO;
 import interfaces.IProductoBO;
-import interfaces.IProductoDAO;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import fachada.FachadaPersistencia;
+import interfaces.IFachadaPersistencia;
 import mappers.ProductoMapper;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -26,12 +19,14 @@ import mappers.ProductoMapper;
 public class ProductoBO implements IProductoBO {
 
     private static ProductoBO instance;
-    private final IProductoDAO productoDAO;
-    private final ICategoriaDAO categoriaDAO;
+    private final IFachadaPersistencia persistencia;
 
     private ProductoBO() {
-        this.productoDAO = new ProductoDAO();
-        this.categoriaDAO = new CategoriaDAO();
+        this(FachadaPersistencia.getInstance());
+    }
+
+    public ProductoBO(IFachadaPersistencia persistencia) {
+        this.persistencia = java.util.Objects.requireNonNull(persistencia);
     }
 
     public static synchronized ProductoBO getInstance() {
@@ -44,19 +39,20 @@ public class ProductoBO implements IProductoBO {
     @Override
     public void guardar(ProductoDTO productoDTO) throws Exception {
         validarProducto(productoDTO);
-        if (productoDTO.getId() != null && productoDTO.getId() > 0) {
+        if (productoDTO.getId() != null) {
             throw new IllegalArgumentException("Un nuevo producto no debe tener un ID asignado.");
         }
         ProductoDTO productoExistente = obtenerPorSku(productoDTO.getSku());
         if (productoExistente != null) {
             throw new IllegalArgumentException("Ya existe un producto registrado con el SKU: " + productoDTO.getSku());
         }
-        Set<Categoria> categorias = consultarCategoriasValidas(productoDTO.getCategoriasIds());
-
-        // Convertir DTO a Entidad inyectando las categorías reales
-        Producto producto = ProductoMapper.toEntity(productoDTO, categorias);
-
-        productoDAO.guardar(producto);
+        ProductoDTO productoConCodigo = obtenerPorCodigoBarras(productoDTO.getCodigoBarras());
+        if (productoConCodigo != null) {
+            throw new IllegalArgumentException("Ya existe un producto registrado con el código de barras: "
+                    + productoDTO.getCodigoBarras());
+        }
+        validarCategoriasExistentes(productoDTO.getCategoriasIds());
+        persistencia.guardarProducto(ProductoMapper.toEntity(productoDTO));
     }
 
     @Override
@@ -76,10 +72,15 @@ public class ProductoBO implements IProductoBO {
             throw new IllegalArgumentException("El SKU " + productoDTO.getSku() + " ya está asignado a otro producto.");
         }
 
-        Set<Categoria> categorias = consultarCategoriasValidas(productoDTO.getCategoriasIds());
-        Producto producto = ProductoMapper.toEntity(productoDTO, categorias);
+        ProductoDTO productoExistenteCodigo = obtenerPorCodigoBarras(productoDTO.getCodigoBarras());
+        if (productoExistenteCodigo != null
+                && !productoExistenteCodigo.getId().equals(productoDTO.getId())) {
+            throw new IllegalArgumentException("El código de barras "
+                    + productoDTO.getCodigoBarras() + " ya está asignado a otro producto.");
+        }
 
-        productoDAO.actualizar(producto);
+        validarCategoriasExistentes(productoDTO.getCategoriasIds());
+        persistencia.actualizarProducto(ProductoMapper.toEntity(productoDTO));
     }
 
     @Override
@@ -93,19 +94,16 @@ public class ProductoBO implements IProductoBO {
             throw new IllegalArgumentException("No se puede eliminar: el producto con ID " + id + " no existe.");
         }
 
-        productoDAO.eliminar(id);
+        persistencia.eliminarProducto(id);
     }
 
     @Override
     public List<ProductoDTO> obtenerTodos() {
-        List<Producto> productos = productoDAO.obtenerTodos();
+        List<ProductoDTO> productos = ProductoMapper.toDTOList(persistencia.obtenerProductos());
         if (productos == null || productos.isEmpty()) {
             return Collections.emptyList();
         }
-
-        return productos.stream()
-                .map(ProductoMapper::toDTO)
-                .collect(Collectors.toList());
+        return productos;
     }
 
     @Override
@@ -114,8 +112,7 @@ public class ProductoBO implements IProductoBO {
             throw new IllegalArgumentException("El ID del producto debe ser un número entero positivo.");
         }
         
-        Producto producto = productoDAO.buscarPorId(id);
-        return producto != null ? ProductoMapper.toDTO(producto) : null;
+        return ProductoMapper.toDTO(persistencia.buscarProductoPorId(id));
     }
 
     @Override
@@ -124,8 +121,16 @@ public class ProductoBO implements IProductoBO {
             throw new IllegalArgumentException("El SKU no puede ser nulo ni estar vacío.");
         }
         
-        Producto producto = productoDAO.obtenerPorSku(sku.trim());
-        return producto != null ? ProductoMapper.toDTO(producto) : null;
+        return ProductoMapper.toDTO(persistencia.buscarProductoPorSku(sku.trim()));
+    }
+
+    @Override
+    public ProductoDTO obtenerPorCodigoBarras(String codigoBarras) {
+        if (codigoBarras == null || codigoBarras.trim().isEmpty()) {
+            throw new IllegalArgumentException("El código de barras no puede ser nulo ni estar vacío.");
+        }
+
+        return ProductoMapper.toDTO(persistencia.buscarProductoPorCodigoBarras(codigoBarras.trim()));
     }
 
     @Override
@@ -134,30 +139,24 @@ public class ProductoBO implements IProductoBO {
             throw new IllegalArgumentException("El ID de la categoría debe ser un número positivo.");
         }
 
-        List<Producto> productos = productoDAO.listarProductosPorCategoria(idCategoria);
+        List<ProductoDTO> productos = ProductoMapper.toDTOList(persistencia.listarProductosPorCategoria(idCategoria));
         if (productos == null || productos.isEmpty()) {
             return Collections.emptyList();
         }
-
-        return productos.stream()
-                .map(ProductoMapper::toDTO)
-                .collect(Collectors.toList());
+        return productos;
     }
 
     @Override
     public List<ProductoDTO> buscarProductos(String criterio) {
         if (criterio == null || criterio.trim().isEmpty()) {
-            return Collections.emptyList();
+            throw new IllegalArgumentException("El criterio de búsqueda no puede estar vacío.");
         }
 
-        List<Producto> productos = productoDAO.buscarProductos(criterio.trim());
+        List<ProductoDTO> productos = ProductoMapper.toDTOList(persistencia.buscarProductos(criterio.trim()));
         if (productos == null || productos.isEmpty()) {
             return Collections.emptyList();
         }
-
-        return productos.stream()
-                .map(ProductoMapper::toDTO)
-                .collect(Collectors.toList());
+        return productos;
     }
 
     /**
@@ -198,15 +197,12 @@ public class ProductoBO implements IProductoBO {
     /**
      * Consulta y verifica que los IDs recibidos correspondan a categorías existentes en BD.
      */
-    private Set<Categoria> consultarCategoriasValidas(Set<Long> categoriasIds) throws Exception {
-        Set<Categoria> categorias = new HashSet<>();
+    private void validarCategoriasExistentes(java.util.Set<Long> categoriasIds) {
         for (Long idCat : categoriasIds) {
-            Categoria categoria = categoriaDAO.buscarPorId(idCat);
+            dominio.Categoria categoria = persistencia.buscarCategoriaPorId(idCat);
             if (categoria == null) {
                 throw new IllegalArgumentException("La categoría con ID " + idCat + " no existe en el sistema.");
             }
-            categorias.add(categoria);
         }
-        return categorias;
     }
 }

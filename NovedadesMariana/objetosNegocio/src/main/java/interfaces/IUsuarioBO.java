@@ -4,7 +4,6 @@
  */
 package interfaces;
 
-import dominio.Usuario;
 import dtos.UsuarioDTO;
 import java.util.List;
 
@@ -19,5 +18,5 @@ public interface IUsuarioBO {
     public void eliminar(Long id) throws Exception;
     public UsuarioDTO buscarPorId(Long id) throws Exception;
     public List<UsuarioDTO> obtenerTodos() throws Exception ;
-    public Usuario buscarPorUsuario(String nombreUsuario) throws Exception ;
+    public UsuarioDTO buscarPorUsuario(String nombreUsuario) throws Exception ;
 }

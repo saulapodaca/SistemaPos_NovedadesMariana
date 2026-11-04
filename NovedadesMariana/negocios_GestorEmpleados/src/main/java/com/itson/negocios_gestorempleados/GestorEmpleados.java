@@ -5,7 +5,7 @@
 package com.itson.negocios_gestorempleados;
 
 import bos.UsuarioBO;
-import dtos.UsuarioDTO;
+import interfaces.IUsuarioDTO;
 import interfaces.IUsuarioBO;
 
 /**
@@ -20,17 +20,29 @@ public class GestorEmpleados implements IGestorEmpleados {
     }
 
     @Override
-    public UsuarioDTO autenticar(String usuario, String contrasenia) {
-        return this.usuarioBO.autenticar(usuario, contrasenia);
+    public IUsuarioDTO autenticar(String usuario, String contrasenia) {
+        try {
+            return this.usuarioBO.autenticar(usuario, contrasenia);
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo autenticar al empleado.", e);
+        }
     }
 
     @Override
-    public UsuarioDTO obtenerPorId(int id) {
-        return this.usuarioBO.obtenerPorId(id);
+    public IUsuarioDTO obtenerPorId(int id) {
+        try {
+            return this.usuarioBO.buscarPorId((long) id);
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo consultar al empleado.", e);
+        }
     }
 
     @Override
-    public UsuarioDTO obtenerPorUsuario(String usuario) {
-        return this.usuarioBO.obtenerPorUsuario(usuario);
+    public IUsuarioDTO obtenerPorUsuario(String usuario) {
+        try {
+            return this.usuarioBO.buscarPorUsuario(usuario);
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo consultar al empleado.", e);
+        }
     }
 }

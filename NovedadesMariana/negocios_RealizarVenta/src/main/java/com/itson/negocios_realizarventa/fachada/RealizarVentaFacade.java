@@ -21,6 +21,13 @@ import dtos.ProductoTallaDTO;
 import dtos.ResumenVentaDTO;
 import dtos.UsuarioDTO;
 import dtos.VentaDTO;
+import interfaces.IProductoDTO;
+import interfaces.IProductoTallaDTO;
+import interfaces.IResumenVentaDTO;
+import interfaces.IUsuarioDTO;
+import interfaces.IVentaDTO;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -62,17 +69,26 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
     // --- Métodos delegados a GestorInventario ---
     @Override
     public ProductoDTO buscarProductoPorCodigo(String codigo) {
-        return this.gestorInventario.buscarProductoPorCodigo(codigo);
+        return adaptarProducto(this.gestorInventario.buscarProductoPorCodigo(codigo));
     }
 
     @Override
     public ProductoDTO obtenerProductoPorId(int id) {
-        return this.gestorInventario.obtenerProductoPorId(id);
+        return adaptarProducto(this.gestorInventario.obtenerProductoPorId(id));
     }
 
     @Override
     public List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto) {
-        return this.gestorInventario.obtenerTallasPorProducto(idProducto);
+        List<? extends IProductoTallaDTO> tallas = this.gestorInventario.obtenerTallasPorProducto(idProducto);
+        if (tallas == null) {
+            return null;
+        }
+        List<ProductoTallaDTO> resultado = new ArrayList<>();
+        for (IProductoTallaDTO talla : tallas) {
+            resultado.add(talla == null ? null : new ProductoTallaDTO(
+                    talla.getId(), talla.getIdProducto(), talla.getTalla(), talla.getStockActual()));
+        }
+        return resultado;
     }
 
     @Override
@@ -83,22 +99,57 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
     // --- Métodos delegados a GestorVentas ---
     @Override
     public ResumenVentaDTO calcularTotales(List<DetalleVentaDTO> detalles, float descuento) {
-        return this.gestorVentas.calcularTotales(detalles, descuento);
+        IResumenVentaDTO resumen = this.gestorVentas.calcularTotales(detalles, descuento);
+        return resumen == null ? null : new ResumenVentaDTO(
+                resumen.getSubtotal(), resumen.getIva(), resumen.getDescuento(), resumen.getTotal());
+    }
+
+    @Override
+    public float calcularCambio(float totalVenta, float montoRecibido) {
+        return this.gestorPagos.calcularCambio(totalVenta, montoRecibido);
     }
 
     @Override
     public VentaDTO obtenerVentaPorId(int id) {
-        return this.gestorVentas.obtenerVentaPorId(id);
+        return adaptarVenta(this.gestorVentas.obtenerVentaPorId(id));
     }
 
     @Override
     public VentaDTO obtenerVentaPorFolio(String folio) {
-        return this.gestorVentas.obtenerVentaPorFolio(folio);
+        return adaptarVenta(this.gestorVentas.obtenerVentaPorFolio(folio));
     }
 
     // --- Métodos delegados a GestorEmpleado ---
     @Override
     public UsuarioDTO autenticarUsuario(String usuario, String contrasenia) {
-        return this.gestorEmpleados.autenticar(usuario, contrasenia);
+        return adaptarUsuario(this.gestorEmpleados.autenticar(usuario, contrasenia));
+    }
+
+    private ProductoDTO adaptarProducto(IProductoDTO producto) {
+        if (producto == null) {
+            return null;
+        }
+        return new ProductoDTO(producto.getId(), producto.getCodigoBarras(), producto.getSku(),
+                producto.getNombre(), producto.getDescripcion(), producto.getPrecio(),
+                producto.getTipoPrenda(), producto.getCategoriasIds() == null
+                        ? null : new HashSet<>(producto.getCategoriasIds()));
+    }
+
+    private VentaDTO adaptarVenta(IVentaDTO venta) {
+        if (venta == null) {
+            return null;
+        }
+        return new VentaDTO(venta.getId(), venta.getFolio(), venta.getFechaHora(),
+                venta.getSubtotal(), venta.getIva(), venta.getTotal(),
+                venta.getIdUsuario(), venta.getDetalles(), venta.getPagos());
+    }
+
+    private UsuarioDTO adaptarUsuario(IUsuarioDTO usuario) {
+        if (usuario == null) {
+            return null;
+        }
+        return new UsuarioDTO(usuario.getId(), usuario.getUsuario(), usuario.getContrasenia(),
+                usuario.getNombres(), usuario.getPrimerApellido(), usuario.getSegundoApellido(),
+                usuario.getRolEmpleado());
     }
 }

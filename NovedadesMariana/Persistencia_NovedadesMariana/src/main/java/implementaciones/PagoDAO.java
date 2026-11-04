@@ -2,6 +2,7 @@
 package implementaciones;
 
 import dominio.Pago;
+import dtos.PagoDTO;
 import entityManager.ConexionJPA;
 import interfaces.IPagoDAO;
 import jakarta.persistence.EntityManager;
@@ -145,6 +146,30 @@ public class PagoDAO implements IPagoDAO {
     }
 
     @Override
+    public Pago buscarPorVenta(Long idVenta) {
+        if (idVenta == null || idVenta <= 0) {
+            throw new IllegalArgumentException(
+                "El ID de venta debe ser mayor a cero."
+            );
+        }
+
+        EntityManager em = conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT v.pago FROM Venta v " +
+                "WHERE v.id = :idVenta AND v.pago IS NOT NULL",
+                Pago.class
+            )
+            .setParameter("idVenta", idVenta)
+            .getResultStream()
+            .findFirst()
+            .orElse(null);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public List<Pago> obtenerTodos() {
         EntityManager em = conexion.getEntityManager();
 
@@ -219,4 +244,7 @@ public class PagoDAO implements IPagoDAO {
             );
         }
     }
+
+
+
 }

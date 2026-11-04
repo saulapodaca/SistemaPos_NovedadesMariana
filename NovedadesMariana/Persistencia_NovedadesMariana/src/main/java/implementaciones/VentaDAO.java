@@ -203,8 +203,7 @@ public class VentaDAO implements IVentaDAO {
     public void actualizar(Venta venta) throws Exception {
         throw new Exception(
             "No se permite modificar ventas registradas. "
-            + "Se requiere un proceso de cancelacion "
-            + "que controle el inventario y el pago."
+            + "Se requiere un proceso controlado de cancelacion."
         );
     }
 
@@ -213,12 +212,51 @@ public class VentaDAO implements IVentaDAO {
         throw new Exception(
             "No se permite eliminar ventas registradas "
             + "porque se perderia el historial. "
-            + "Utilice un proceso de cancelacion."
+            + "Utilice el proceso de cancelacion."
         );
     }
 
     @Override
-    public Venta buscarPorId(Long id) {
+    public boolean cancelar(Long id) throws Exception {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                "El ID de venta debe ser mayor a cero."
+            );
+        }
+
+        EntityManager em = conexion.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            Venta venta = em.find(Venta.class, id, LockModeType.PESSIMISTIC_WRITE);
+            if (venta == null) {
+                em.getTransaction().rollback();
+                return false;
+            }
+
+            // El detalle persistido solo referencia al producto; la talla se
+            // recibe por DTO y se usa al vender, pero no queda asociada a la venta.
+            if (venta.getPago() != null) {
+                Pago pago = venta.getPago();
+                em.remove(venta);
+                em.flush();
+                em.remove(pago);
+            } else {
+                em.remove(venta);
+            }
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new Exception("Error al cancelar la venta: " + e.getMessage(), e);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public Venta buscarVentaPorId(Long id) {
         EntityManager em = conexion.getEntityManager();
 
         try {
@@ -245,7 +283,30 @@ public class VentaDAO implements IVentaDAO {
         }
     }
 
-    @Override
+    public Venta buscarPorFolio(String folio) {
+        if (folio == null || folio.isBlank()) {
+            return null;
+        }
+        EntityManager em = conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT DISTINCT v FROM Venta v " +
+                "JOIN FETCH v.usuario " +
+                "JOIN FETCH v.pago " +
+                "LEFT JOIN FETCH v.detalles d " +
+                "LEFT JOIN FETCH d.producto " +
+                "WHERE LOWER(v.folio) = LOWER(:folio)",
+                Venta.class
+            )
+            .setParameter("folio", folio.trim())
+            .getResultStream()
+            .findFirst()
+            .orElse(null);
+        } finally {
+            em.close();
+        }
+    }
+
     public List<Venta> obtenerTodas() {
         EntityManager em = conexion.getEntityManager();
 
@@ -263,6 +324,10 @@ public class VentaDAO implements IVentaDAO {
             em.close();
         }
     }
+
+
+
+
 
     // Validaciones basicas de la venta
     private void validarVenta(Venta venta) {
@@ -312,17 +377,11 @@ public class VentaDAO implements IVentaDAO {
         }
 
         Pago pago = venta.getPago();
-
-        if (pago == null ||
-            pago.getId() != null ||
-            pago.getMetodoPago() == null ||
-            pago.getMonto() == null ||
-            !Float.isFinite(pago.getMonto()) ||
-            pago.getMonto() <= 0 ||
+        if (pago == null || pago.getId() != null ||
+            pago.getMetodoPago() == null || pago.getMonto() == null ||
+            !Float.isFinite(pago.getMonto()) || pago.getMonto() <= 0 ||
             pago.getFechaHora() == null) {
-            throw new IllegalArgumentException(
-                "Debe proporcionar un pago nuevo y valido."
-            );
+            throw new IllegalArgumentException("El pago de la venta no es válido.");
         }
 
         if (venta.getDetalles() == null ||
