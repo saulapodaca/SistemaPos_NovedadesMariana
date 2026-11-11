@@ -4,10 +4,14 @@
  */
 package bos;
 
+import java.util.ArrayList;
+
+import dominio.Categoria;
+
 import dtos.CategoriaDTO;
 import interfaces.ICategoriaBO;
-import fachada.FachadaPersistencia;
-import interfaces.IFachadaPersistencia;
+import daos.CategoriaDAO;
+import interfaces.ICategoriaDAO;
 import mappers.CategoriaMapper;
 import java.util.Collections;
 import java.util.List;
@@ -19,14 +23,14 @@ import java.util.List;
 public class CategoriaBO implements ICategoriaBO {
 
     private static CategoriaBO instance;
-    private final IFachadaPersistencia persistencia;
+    private final ICategoriaDAO categoriaDAO;
 
     private CategoriaBO() {
-        this(FachadaPersistencia.getInstance());
+        this(new CategoriaDAO());
     }
 
-    public CategoriaBO(IFachadaPersistencia persistencia) {
-        this.persistencia = java.util.Objects.requireNonNull(persistencia);
+    public CategoriaBO(ICategoriaDAO categoriaDAO) {
+        this.categoriaDAO = java.util.Objects.requireNonNull(categoriaDAO);
     }
 
     public static synchronized CategoriaBO getInstance() {
@@ -46,7 +50,7 @@ public class CategoriaBO implements ICategoriaBO {
 
         validarNombreUnico(categoriaDTO.getNombre(), null);
 
-        persistencia.guardarCategoria(CategoriaMapper.toEntity(categoriaDTO));
+        categoriaDAO.guardar(CategoriaMapper.toEntity(categoriaDTO));
     }
 
     @Override
@@ -64,7 +68,7 @@ public class CategoriaBO implements ICategoriaBO {
 
         validarNombreUnico(categoriaDTO.getNombre(), categoriaDTO.getId());
 
-        persistencia.actualizarCategoria(CategoriaMapper.toEntity(categoriaDTO));
+        categoriaDAO.actualizar(CategoriaMapper.toEntity(categoriaDTO));
     }
 
     @Override
@@ -78,7 +82,7 @@ public class CategoriaBO implements ICategoriaBO {
             throw new IllegalArgumentException("No se puede eliminar: la categoría con ID " + id + " no existe.");
         }
 
-        persistencia.eliminarCategoria(id);
+        categoriaDAO.eliminar(id);
     }
 
     @Override
@@ -87,7 +91,7 @@ public class CategoriaBO implements ICategoriaBO {
             throw new IllegalArgumentException("El ID de la categoría debe ser un número entero positivo.");
         }
 
-        return CategoriaMapper.toDTO(persistencia.buscarCategoriaPorId(id));
+        return CategoriaMapper.toDTO(categoriaDAO.buscarCategoriaPorId(id));
     }
 
     @Override
@@ -103,7 +107,7 @@ public class CategoriaBO implements ICategoriaBO {
 
     @Override
     public List<CategoriaDTO> obtenerTodas() {
-        List<CategoriaDTO> categorias = CategoriaMapper.toDTOList(persistencia.obtenerCategorias());
+        List<CategoriaDTO> categorias = convertirListaADTO(categoriaDAO.obtenerTodas());
         if (categorias == null || categorias.isEmpty()) {
             return Collections.emptyList();
         }
@@ -130,7 +134,7 @@ public class CategoriaBO implements ICategoriaBO {
      * Comprueba que no exista otra categoría registrada con el mismo nombre.
      */
     private void validarNombreUnico(String nombre, Long idActual) {
-        List<CategoriaDTO> todas = CategoriaMapper.toDTOList(persistencia.obtenerCategorias());
+        List<CategoriaDTO> todas = convertirListaADTO(categoriaDAO.obtenerTodas());
         if (todas == null || todas.isEmpty()) {
             return;
         }
@@ -144,5 +148,15 @@ public class CategoriaBO implements ICategoriaBO {
                 throw new IllegalArgumentException("Ya existe una categoría registrada con el nombre: " + nombreLimpio);
             }
         }
+    }
+
+    private List<CategoriaDTO> convertirListaADTO(List<Categoria> entidades) {
+        List<CategoriaDTO> resultado = new ArrayList<>();
+        if (entidades != null) {
+            for (Categoria entidad : entidades) {
+                resultado.add(CategoriaMapper.toDTO(entidad));
+            }
+        }
+        return resultado;
     }
 }

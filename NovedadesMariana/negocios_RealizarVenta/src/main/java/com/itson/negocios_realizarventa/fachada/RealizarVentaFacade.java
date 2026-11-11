@@ -152,4 +152,23 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
                 usuario.getNombres(), usuario.getPrimerApellido(), usuario.getSegundoApellido(),
                 usuario.getRolEmpleado());
     }
+    @Override
+    public List<ProductoDTO> buscarProductos(String criterio) {
+        List<ProductoDTO> resultado = new ArrayList<>();
+        List<? extends IProductoDTO> productos = gestorInventario.buscarProductos(criterio);
+        if (productos != null) {
+            for (IProductoDTO producto : productos) {
+                if (producto != null) resultado.add(adaptarProducto(producto));
+            }
+        }
+        return resultado;
+    }
+    @Override
+    public List<ProductoDTO> buscarProductosPorCategoria(String nombre) {
+        List<ProductoDTO> productos = new ArrayList<>();
+        for (IProductoDTO producto : gestorInventario.buscarProductosPorCategoria(nombre)) {
+            productos.add(adaptarProducto(producto));
+        }
+        return productos;
+    }
 }

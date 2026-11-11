@@ -35,4 +35,6 @@ public interface IRealizarVentaFacade {
     UsuarioDTO autenticarUsuario(String usuario, String contrasenia);
     VentaDTO obtenerVentaPorId(int id);
     VentaDTO obtenerVentaPorFolio(String folio);
+    List<ProductoDTO> buscarProductos(String criterio);
+    List<ProductoDTO> buscarProductosPorCategoria(String nombre);
 }

@@ -3,8 +3,6 @@ package mappers;
 import dominio.Categoria;
 import dominio.Producto;
 import dtos.ProductoDTO;
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /** Conversiones entre Producto y el DTO usado por la capa de negocio. */
@@ -42,7 +40,7 @@ public final class ProductoMapper {
         producto.setDescripcion(dto.getDescripcion());
         producto.setPrecio(dto.getPrecio());
         if (dto.getTipoPrenda() != null) {
-            producto.setTipoPrenda(dominio.TipoPrenda.valueOf(dto.getTipoPrenda().name()));
+            producto.setTipoPrenda(enums.TipoPrenda.valueOf(dto.getTipoPrenda().name()));
         }
         if (dto.getCategoriasIds() != null) {
             for (Long id : dto.getCategoriasIds()) {
@@ -56,10 +54,4 @@ public final class ProductoMapper {
         return producto;
     }
 
-    public static List<ProductoDTO> toDTOList(List<Producto> items) {
-        return items == null ? Collections.emptyList() : items.stream().map(ProductoMapper::toDTO).collect(Collectors.toList());
-    }
-    public static List<Producto> toEntityList(List<ProductoDTO> items) {
-        return items == null ? Collections.emptyList() : items.stream().map(ProductoMapper::toEntity).collect(Collectors.toList());
-    }
 }

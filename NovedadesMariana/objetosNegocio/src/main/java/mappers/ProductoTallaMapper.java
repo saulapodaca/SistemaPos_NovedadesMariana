@@ -21,8 +21,4 @@ public final class ProductoTallaMapper {
         if (dto.getIdProducto() > 0) { Producto producto = new Producto(); producto.setId((long) dto.getIdProducto()); talla.setProducto(producto); }
         return talla;
     }
-    public static java.util.List<ProductoTallaDTO> toDTOList(java.util.List<ProductoTalla> items) {
-        return items == null ? java.util.Collections.emptyList()
-                : items.stream().map(ProductoTallaMapper::toDTO).collect(java.util.stream.Collectors.toList());
-    }
 }

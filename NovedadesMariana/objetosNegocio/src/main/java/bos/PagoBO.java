@@ -2,8 +2,8 @@ package bos;
 
 import dtos.PagoDTO;
 import interfaces.IPagoBO;
-import fachada.FachadaPersistencia;
-import interfaces.IFachadaPersistencia;
+import daos.PagoDAO;
+import interfaces.IPagoDAO;
 import mappers.PagoMapper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,14 +13,14 @@ import java.util.Locale;
 public class PagoBO implements IPagoBO {
 
     private static PagoBO instance;
-    private final IFachadaPersistencia persistencia;
+    private final IPagoDAO pagoDAO;
 
     private PagoBO() {
-        this(FachadaPersistencia.getInstance());
+        this(new PagoDAO());
     }
 
-    public PagoBO(IFachadaPersistencia persistencia) {
-        this.persistencia = java.util.Objects.requireNonNull(persistencia);
+    public PagoBO(IPagoDAO pagoDAO) {
+        this.pagoDAO = java.util.Objects.requireNonNull(pagoDAO);
     }
 
     public static synchronized PagoBO getInstance() {
@@ -50,7 +50,7 @@ public class PagoBO implements IPagoBO {
         // El pago ya se guardó junto con la venta por la operación de registro.
         // Este método recupera y confirma ese registro; no crea otra fila.
         validarPago(pagoDTO, true);
-        PagoDTO pagoRegistrado = PagoMapper.toDTO(persistencia.buscarPagoPorVenta((long) pagoDTO.getIdVenta()));
+        PagoDTO pagoRegistrado = PagoMapper.toDTO(pagoDAO.buscarPorVenta((long) pagoDTO.getIdVenta()));
         if (pagoRegistrado != null) pagoRegistrado.setIdVenta(pagoDTO.getIdVenta());
         if (pagoRegistrado == null) {
             throw new IllegalStateException(
@@ -85,7 +85,7 @@ public class PagoBO implements IPagoBO {
         if (idVenta <= 0) {
             throw new IllegalArgumentException("El ID de venta debe ser mayor a cero.");
         }
-        PagoDTO pago = PagoMapper.toDTO(persistencia.buscarPagoPorVenta((long) idVenta));
+        PagoDTO pago = PagoMapper.toDTO(pagoDAO.buscarPorVenta((long) idVenta));
         if (pago != null) pago.setIdVenta(idVenta);
         return pago == null ? List.of()
                 : List.of(pago);

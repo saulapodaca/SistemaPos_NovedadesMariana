@@ -20,7 +20,7 @@ public final class PagoMapper {
         if (dto == null) return null;
         Pago pago = new Pago();
         if (dto.getId() > 0) pago.setId((long) dto.getId());
-        if (dto.getMetodoPago() != null && !dto.getMetodoPago().isBlank()) pago.setMetodoPago(dominio.MetodoPago.valueOf(dto.getMetodoPago()));
+        if (dto.getMetodoPago() != null && !dto.getMetodoPago().isBlank()) pago.setMetodoPago(enums.MetodoPago.valueOf(dto.getMetodoPago()));
         pago.setMonto(dto.getMonto()); pago.setMontoRecibido(dto.getMontoRecibido());
         pago.setCambio(dto.getCambio()); pago.setFechaHora(dto.getFechaHora());
         return pago;

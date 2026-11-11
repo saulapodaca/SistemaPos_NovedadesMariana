@@ -6,10 +6,9 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>Dominio_NovedadesMariana</module>
         <module>dto_negocios</module>
         <module>objetosNegocio</module>
-        <module>Persistencia_NovedadesMariana</module>
+        <module>persistencia</module>
         <module>negocios_GestorEmpleados</module>
         <module>negocios_GestorInventario</module>
         <module>negocios_GestorVentas</module>

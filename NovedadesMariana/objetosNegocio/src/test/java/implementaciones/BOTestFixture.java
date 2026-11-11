@@ -1,13 +1,19 @@
 package implementaciones;
 
 import bos.VentaBO;
-import fachada.FachadaPersistencia;
-import interfaces.IFachadaPersistencia;
+import daos.CategoriaDAO;
+import daos.ProductoDAO;
+import daos.UsuarioDAO;
+import daos.VentaDAO;
+import interfaces.ICategoriaDAO;
+import interfaces.IProductoDAO;
+import interfaces.IUsuarioDAO;
+import interfaces.IVentaDAO;
 import dominio.Categoria;
 import dominio.Producto;
 import dominio.ProductoTalla;
-import dominio.RolEmpleado;
-import dominio.TipoPrenda;
+import enums.RolEmpleado;
+import enums.TipoPrenda;
 import dominio.Usuario;
 import dtos.DetalleVentaDTO;
 import dtos.PagoDTO;
@@ -19,7 +25,10 @@ import java.util.UUID;
 /** Fixtures de prueba que crean y limpian registros mediante los DAO reales. */
 final class BOTestFixture implements AutoCloseable {
 
-    private final IFachadaPersistencia persistencia = FachadaPersistencia.getInstance();
+    private final ICategoriaDAO categoriaDAO = new CategoriaDAO();
+    private final IProductoDAO productoDAO = new ProductoDAO();
+    private final IUsuarioDAO usuarioDAO = new UsuarioDAO();
+    private final IVentaDAO ventaDAO = new VentaDAO();
 
     final Categoria categoria;
     final Producto producto;
@@ -33,7 +42,7 @@ final class BOTestFixture implements AutoCloseable {
 
         categoria = new Categoria("BO-" + codigo,
                 "Categoría de las pruebas BO");
-        persistencia.guardarCategoria(categoria);
+        categoriaDAO.guardar(categoria);
 
         producto = new Producto("SKU-BO-" + codigo, "BAR-BO-" + codigo,
                 "Producto de prueba", "Fixture para pruebas de negocio",
@@ -41,11 +50,11 @@ final class BOTestFixture implements AutoCloseable {
         producto.agregarCategoria(categoria);
         talla = new ProductoTalla("M", 20, producto);
         producto.agregarTalla(talla);
-        persistencia.guardarProducto(producto);
+        productoDAO.guardar(producto);
 
         usuario = new Usuario("usuario_" + codigo, "clave_prueba",
                 "Ana", "Prueba", "", RolEmpleado.EMPLEADO);
-        persistencia.guardarUsuario(usuario);
+        usuarioDAO.guardar(usuario);
     }
 
     VentaDTO nuevaVenta(int cantidad) {
@@ -95,17 +104,17 @@ final class BOTestFixture implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        if (idVenta != null && persistencia.buscarVentaPorId(idVenta) != null) {
+        if (idVenta != null && ventaDAO.buscarVentaPorId(idVenta) != null) {
             VentaBO.getInstance().cancelarVenta(Math.toIntExact(idVenta));
         }
-        if (producto.getId() != null && persistencia.buscarProductoPorId(producto.getId()) != null) {
-            persistencia.eliminarProducto(producto.getId());
+        if (producto.getId() != null && productoDAO.buscarProductoPorId(producto.getId()) != null) {
+            productoDAO.eliminar(producto.getId());
         }
-        if (categoria.getId() != null && persistencia.buscarCategoriaPorId(categoria.getId()) != null) {
-            persistencia.eliminarCategoria(categoria.getId());
+        if (categoria.getId() != null && categoriaDAO.buscarCategoriaPorId(categoria.getId()) != null) {
+            categoriaDAO.eliminar(categoria.getId());
         }
-        if (usuario.getId() != null && persistencia.buscarUsuarioPorId(usuario.getId()) != null) {
-            persistencia.eliminarUsuario(usuario.getId());
+        if (usuario.getId() != null && usuarioDAO.buscarPorId(usuario.getId()) != null) {
+            usuarioDAO.eliminar(usuario.getId());
         }
     }
 }

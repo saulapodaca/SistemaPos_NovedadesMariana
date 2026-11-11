@@ -1,13 +1,23 @@
 package bos;
 
+import java.util.IdentityHashMap;
+
+import java.util.Map;
+
+import dominio.Venta;
+
+import dominio.DetalleVenta;
+
 import dtos.DetalleVentaDTO;
 import dtos.PagoDTO;
 import dtos.ResumenVentaDTO;
 import dtos.VentaDTO;
 import interfaces.IPagoBO;
 import interfaces.IVentaBO;
-import fachada.FachadaPersistencia;
-import interfaces.IFachadaPersistencia;
+import daos.ProductoTallaDAO;
+import daos.VentaDAO;
+import interfaces.IProductoTallaDAO;
+import interfaces.IVentaDAO;
 import mappers.VentaMapper;
 import mappers.PagoMapper;
 import java.util.List;
@@ -21,15 +31,17 @@ public class VentaBO implements IVentaBO {
     private static final double IMPORTE_TOLERANCE = 0.001d;
 
     private static VentaBO instance;
-    private final IFachadaPersistencia persistencia;
+    private final IVentaDAO ventaDAO;
+    private final IProductoTallaDAO productoTallaDAO;
     private final IPagoBO pagoBO;
 
     private VentaBO() {
-        this(FachadaPersistencia.getInstance(), PagoBO.getInstance());
+        this(new VentaDAO(), new ProductoTallaDAO(), PagoBO.getInstance());
     }
 
-    public VentaBO(IFachadaPersistencia persistencia, IPagoBO pagoBO) {
-        this.persistencia = java.util.Objects.requireNonNull(persistencia);
+    public VentaBO(IVentaDAO ventaDAO, IProductoTallaDAO productoTallaDAO, IPagoBO pagoBO) {
+        this.ventaDAO = java.util.Objects.requireNonNull(ventaDAO);
+        this.productoTallaDAO = java.util.Objects.requireNonNull(productoTallaDAO);
         this.pagoBO = java.util.Objects.requireNonNull(pagoBO);
     }
 
@@ -57,8 +69,8 @@ public class VentaBO implements IVentaBO {
                 ventaDTO.getIdUsuario(), ventaDTO.getDetalles(), List.of(pagoPreparado));
 
         try {
-            dominio.Venta entidad = VentaMapper.toEntity(ventaPreparada, persistencia);
-            persistencia.registrarVentaConTallas(entidad, VentaMapper.tallasPorDetalle(entidad, ventaPreparada));
+            dominio.Venta entidad = VentaMapper.toEntity(ventaPreparada, productoTallaDAO);
+            ventaDAO.guardarConTallas(entidad, tallasPorDetalle(entidad, ventaPreparada));
             if (entidad.getId() != null) ventaPreparada.setId(entidad.getId().intValue());
             if (entidad.getId() != null) {
                 PagoDTO pagoPersistido = PagoMapper.toDTO(entidad.getPago());
@@ -80,7 +92,7 @@ public class VentaBO implements IVentaBO {
         if (id <= 0) {
             throw new IllegalArgumentException("El ID de venta debe ser mayor a cero.");
         }
-        return VentaMapper.toDTO(persistencia.buscarVentaPorId((long) id));
+        return VentaMapper.toDTO(ventaDAO.buscarVentaPorId((long) id));
     }
 
     @Override
@@ -88,7 +100,7 @@ public class VentaBO implements IVentaBO {
         if (folio == null || folio.isBlank()) {
             throw new IllegalArgumentException("El folio de venta no puede estar vacío.");
         }
-        return VentaMapper.toDTO(persistencia.buscarVentaPorFolio(folio));
+        return VentaMapper.toDTO(ventaDAO.buscarPorFolio(folio));
     }
 
     @Override
@@ -125,7 +137,7 @@ public class VentaBO implements IVentaBO {
             throw new IllegalArgumentException("El ID de venta debe ser mayor a cero.");
         }
         try {
-            return persistencia.cancelarVenta((long) idVenta);
+            return ventaDAO.cancelar((long) idVenta);
         } catch (Exception e) {
             throw new IllegalStateException("No se pudo cancelar la venta.", e);
         }
@@ -212,4 +224,12 @@ public class VentaBO implements IVentaBO {
                 && Math.abs(actual - esperado) <= IMPORTE_TOLERANCE;
     }
 
+    private Map<DetalleVenta, Long> tallasPorDetalle(Venta venta, VentaDTO dto) {
+        Map<DetalleVenta, Long> resultado = new IdentityHashMap<>();
+        if (venta == null || dto == null || venta.getDetalles() == null || dto.getDetalles() == null) return resultado;
+        for (int i = 0; i < Math.min(venta.getDetalles().size(), dto.getDetalles().size()); i++) {
+            resultado.put(venta.getDetalles().get(i), (long) dto.getDetalles().get(i).getIdProductoTalla());
+        }
+        return resultado;
+    }
 }

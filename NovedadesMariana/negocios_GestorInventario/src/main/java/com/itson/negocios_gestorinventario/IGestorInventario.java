@@ -26,4 +26,6 @@ public interface IGestorInventario {
     boolean descontarStock(int idProductoTalla, int cantidad);
 
     boolean reabastecerStock(int idProductoTalla, int cantidad);
+    List<? extends IProductoDTO> buscarProductos(String criterio);
+    List<? extends IProductoDTO> buscarProductosPorCategoria(String nombre);
 }

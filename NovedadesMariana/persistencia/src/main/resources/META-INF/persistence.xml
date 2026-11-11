@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.1" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+  
+  <!-- Unidad de persistencia principal (Desarrollo / Producción) -->
+  <persistence-unit name="persistenciaPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>dominio.Categoria</class>
+    <class>dominio.DetalleVenta</class>
+    <class>dominio.Pago</class>
+    <class>dominio.Producto</class>
+    <class>dominio.ProductoTalla</class>
+    <class>dominio.Usuario</class>
+    <class>dominio.Venta</class>
+    <properties>
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/novedadesmariana?zeroDateTimeBehavior=CONVERT_TO_NULL"/>
+      <property name="jakarta.persistence.jdbc.user" value="root"/>
+      <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+      <property name="jakarta.persistence.jdbc.password" value="itson"/>
+      <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+    </properties>
+  </persistence-unit>
+
+  <!-- Unidad de persistencia de pruebas, sin generar ni borrar el esquema. -->
+  <persistence-unit name="persistenciaPU_Test" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>dominio.Categoria</class>
+    <class>dominio.DetalleVenta</class>
+    <class>dominio.Pago</class>
+    <class>dominio.Producto</class>
+    <class>dominio.ProductoTalla</class>
+    <class>dominio.Usuario</class>
+    <class>dominio.Venta</class>
+    <properties>
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/novedadesmariana_test?zeroDateTimeBehavior=CONVERT_TO_NULL"/>
+      <property name="jakarta.persistence.jdbc.user" value="root"/>
+      <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+      <property name="jakarta.persistence.jdbc.password" value="itson"/>
+      <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+    </properties>
+  </persistence-unit>
+
+</persistence>

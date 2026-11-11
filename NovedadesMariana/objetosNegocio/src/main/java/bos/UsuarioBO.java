@@ -1,9 +1,13 @@
 package bos;
 
+import java.util.ArrayList;
+
+import dominio.Usuario;
+
 import dtos.UsuarioDTO;
 import interfaces.IUsuarioBO;
-import fachada.FachadaPersistencia;
-import interfaces.IFachadaPersistencia;
+import daos.UsuarioDAO;
+import interfaces.IUsuarioDAO;
 import mappers.UsuarioMapper;
 import java.util.List;
 
@@ -16,14 +20,14 @@ import java.util.List;
 public class UsuarioBO implements IUsuarioBO {
 
     private static UsuarioBO instance;
-    private final IFachadaPersistencia persistencia;
+    private final IUsuarioDAO usuarioDAO;
 
     private UsuarioBO() {
-        this(FachadaPersistencia.getInstance());
+        this(new UsuarioDAO());
     }
 
-    public UsuarioBO(IFachadaPersistencia persistencia) {
-        this.persistencia = java.util.Objects.requireNonNull(persistencia);
+    public UsuarioBO(IUsuarioDAO usuarioDAO) {
+        this.usuarioDAO = java.util.Objects.requireNonNull(usuarioDAO);
     }
 
     public static synchronized UsuarioBO getInstance() {
@@ -38,7 +42,7 @@ public class UsuarioBO implements IUsuarioBO {
         validarTexto(usuario, "El nombre de usuario es obligatorio.");
         validarTexto(contrasenia, "La contraseña es obligatoria.");
 
-        UsuarioDTO usuarioEncontrado = UsuarioMapper.toDTO(persistencia.buscarUsuarioParaAutenticacion(usuario));
+        UsuarioDTO usuarioEncontrado = UsuarioMapper.toDTO(usuarioDAO.buscarPorUsuario(usuario));
         if (usuarioEncontrado == null
                 || !contrasenia.equals(usuarioEncontrado.getContrasenia())) {
             return null;
@@ -58,10 +62,10 @@ public class UsuarioBO implements IUsuarioBO {
             throw new IllegalArgumentException("Un usuario nuevo no debe incluir un ID asignado.");
         }
 
-        if (persistencia.buscarUsuarioPorNombre(usuarioDTO.getUsuario()) != null) {
+        if (usuarioDAO.buscarPorUsuario(usuarioDTO.getUsuario()) != null) {
             throw new Exception("El nombre de usuario ya está registrado.");
         }
-        persistencia.guardarUsuario(UsuarioMapper.toEntity(usuarioDTO));
+        usuarioDAO.guardar(UsuarioMapper.toEntity(usuarioDTO));
     }
 
     @Override
@@ -72,44 +76,44 @@ public class UsuarioBO implements IUsuarioBO {
             throw new IllegalArgumentException("El ID del usuario es requerido para actualizar.");
         }
 
-        UsuarioDTO existente = UsuarioMapper.toDTO(persistencia.buscarUsuarioPorId(usuarioDTO.getId()));
+        UsuarioDTO existente = UsuarioMapper.toDTO(usuarioDAO.buscarPorId(usuarioDTO.getId()));
         if (existente == null) {
             throw new Exception("El usuario que intenta actualizar no existe.");
         }
-        UsuarioDTO mismoNombre = UsuarioMapper.toDTO(persistencia.buscarUsuarioPorNombre(usuarioDTO.getUsuario()));
+        UsuarioDTO mismoNombre = UsuarioMapper.toDTO(usuarioDAO.buscarPorUsuario(usuarioDTO.getUsuario()));
         if (mismoNombre != null && !usuarioDTO.getId().equals(mismoNombre.getId())) {
             throw new IllegalArgumentException("El nombre de usuario ya está registrado.");
         }
-        persistencia.actualizarUsuario(UsuarioMapper.toEntity(usuarioDTO));
+        usuarioDAO.actualizar(UsuarioMapper.toEntity(usuarioDTO));
     }
 
     @Override
     public void eliminar(Long id) throws Exception {
         validarId(id);
 
-        UsuarioDTO existente = UsuarioMapper.toDTO(persistencia.buscarUsuarioPorId(id));
+        UsuarioDTO existente = UsuarioMapper.toDTO(usuarioDAO.buscarPorId(id));
         if (existente == null) {
             throw new Exception("El usuario que desea eliminar no existe.");
         }
 
-        persistencia.eliminarUsuario(id);
+        usuarioDAO.eliminar(id);
     }
 
     @Override
     public UsuarioDTO buscarPorId(Long id) throws Exception {
         validarId(id);
-        return UsuarioMapper.toDTO(persistencia.buscarUsuarioPorId(id));
+        return UsuarioMapper.toDTO(usuarioDAO.buscarPorId(id));
     }
 
     @Override
     public List<UsuarioDTO> obtenerTodos() throws Exception {
-        return UsuarioMapper.toDTOList(persistencia.obtenerUsuarios());
+        return convertirListaADTO(usuarioDAO.obtenerTodos());
     }
 
     @Override
     public UsuarioDTO buscarPorUsuario(String nombreUsuario) throws Exception {
         validarTexto(nombreUsuario, "El nombre de usuario no puede estar vacío.");
-        return UsuarioMapper.toDTO(persistencia.buscarUsuarioPorNombre(nombreUsuario));
+        return UsuarioMapper.toDTO(usuarioDAO.buscarPorUsuario(nombreUsuario));
     }
 
     // =========================================================================
@@ -134,5 +138,15 @@ public class UsuarioBO implements IUsuarioBO {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("El ID proporcionado no es válido.");
         }
+    }
+
+    private List<UsuarioDTO> convertirListaADTO(List<Usuario> entidades) {
+        List<UsuarioDTO> resultado = new ArrayList<>();
+        if (entidades != null) {
+            for (Usuario entidad : entidades) {
+                resultado.add(UsuarioMapper.toDTO(entidad));
+            }
+        }
+        return resultado;
     }
 }

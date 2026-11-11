@@ -1,10 +1,10 @@
 package implementaciones;
 
 import bos.ProductoTallaBO;
-import fachada.FachadaPersistencia;
+import daos.ProductoDAO;
 import dominio.Producto;
 import dominio.ProductoTalla;
-import dominio.TipoPrenda;
+import enums.TipoPrenda;
 import dtos.ProductoTallaDTO;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ProductoTallaBOTest {
 
-    private final FachadaPersistencia persistencia = FachadaPersistencia.getInstance();
+    private final ProductoDAO productoDAO = new ProductoDAO();
     private ProductoTallaBO productoTallaBO;
     private Long idProducto;
     private Long idTalla;
@@ -28,15 +28,15 @@ class ProductoTallaBOTest {
                 100.0f, TipoPrenda.CAMISA);
         ProductoTalla talla = new ProductoTalla("M", 8, producto);
         producto.agregarTalla(talla);
-        persistencia.guardarProducto(producto);
+        productoDAO.guardar(producto);
         idProducto = producto.getId();
         idTalla = talla.getId();
     }
 
     @AfterEach
     void limpiar() throws Exception {
-        if (idProducto != null && persistencia.buscarProductoPorId(idProducto) != null) {
-            persistencia.eliminarProducto(idProducto);
+        if (idProducto != null && productoDAO.buscarProductoPorId(idProducto) != null) {
+            productoDAO.eliminar(idProducto);
         }
     }
 

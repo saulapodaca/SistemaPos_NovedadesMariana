@@ -3,9 +3,6 @@ package mappers;
 import dominio.Categoria;
 import dtos.CategoriaDTO;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Mapeador para transformar entre la entidad de dominio Categoria 
@@ -45,27 +42,4 @@ public class CategoriaMapper {
         return categoria;
     }
 
-    /**
-     * Convierte una lista de Entidades Categoria a una lista de CategoriaDTO.
-     */
-    public static List<CategoriaDTO> toDTOList(List<Categoria> categorias) {
-        if (categorias == null || categorias.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return categorias.stream()
-                .map(CategoriaMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Convierte una lista de CategoriaDTO a una lista de Entidades Categoria.
-     */
-    public static List<Categoria> toEntityList(List<CategoriaDTO> dtos) {
-        if (dtos == null || dtos.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return dtos.stream()
-                .map(CategoriaMapper::toEntity)
-                .collect(Collectors.toList());
-    }
 }

@@ -58,4 +58,18 @@ public class GestorInventario implements IGestorInventario {
     public boolean reabastecerStock(int idProductoTalla, int cantidad) {
         return this.productoTallaBO.reabastecerStock(idProductoTalla, cantidad);
     }
+    @Override
+    public List<? extends IProductoDTO> buscarProductos(String criterio) {
+        return productoBO.buscarProductos(criterio);
+    }
+    @Override
+    public List<? extends IProductoDTO> buscarProductosPorCategoria(String nombre) {
+        if (nombre == null || nombre.isBlank()) return List.of();
+        for (dtos.CategoriaDTO categoria : bos.CategoriaBO.getInstance().obtenerTodas()) {
+            if (nombre.trim().equalsIgnoreCase(categoria.getNombre())) {
+                return productoBO.listarProductosPorCategoria(categoria.getId());
+            }
+        }
+        return List.of();
+    }
 }

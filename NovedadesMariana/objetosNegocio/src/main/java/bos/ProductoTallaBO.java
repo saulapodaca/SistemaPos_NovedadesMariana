@@ -1,9 +1,13 @@
 package bos;
 
+import java.util.ArrayList;
+
+import dominio.ProductoTalla;
+
 import dtos.ProductoTallaDTO;
 import interfaces.IProductoTallaBO;
-import fachada.FachadaPersistencia;
-import interfaces.IFachadaPersistencia;
+import daos.ProductoTallaDAO;
+import interfaces.IProductoTallaDAO;
 import mappers.ProductoTallaMapper;
 import java.util.List;
 
@@ -11,14 +15,14 @@ import java.util.List;
 public class ProductoTallaBO implements IProductoTallaBO {
 
     private static ProductoTallaBO instance;
-    private final IFachadaPersistencia persistencia;
+    private final IProductoTallaDAO productoTallaDAO;
 
     private ProductoTallaBO() {
-        this(FachadaPersistencia.getInstance());
+        this(new ProductoTallaDAO());
     }
 
-    public ProductoTallaBO(IFachadaPersistencia persistencia) {
-        this.persistencia = java.util.Objects.requireNonNull(persistencia);
+    public ProductoTallaBO(IProductoTallaDAO productoTallaDAO) {
+        this.productoTallaDAO = java.util.Objects.requireNonNull(productoTallaDAO);
     }
 
     public static synchronized ProductoTallaBO getInstance() {
@@ -72,11 +76,11 @@ public class ProductoTallaBO implements IProductoTallaBO {
         if (idProducto <= 0) {
             throw new IllegalArgumentException("El ID de producto debe ser mayor a cero.");
         }
-        return ProductoTallaMapper.toDTOList(persistencia.obtenerTallasPorProducto((long) idProducto));
+        return convertirListaADTO(productoTallaDAO.obtenerPorProducto((long) idProducto));
     }
 
     private ProductoTallaDTO buscarTalla(int idProductoTalla) {
-        ProductoTallaDTO talla = ProductoTallaMapper.toDTO(persistencia.buscarProductoTallaPorId((long) idProductoTalla));
+        ProductoTallaDTO talla = ProductoTallaMapper.toDTO(productoTallaDAO.buscarProductoTallaPorId((long) idProductoTalla));
         if (talla == null) {
             throw new IllegalArgumentException(
                     "No existe la talla de producto con ID " + idProductoTalla + ".");
@@ -86,7 +90,7 @@ public class ProductoTallaBO implements IProductoTallaBO {
 
     private void actualizar(ProductoTallaDTO talla) {
         try {
-            persistencia.actualizarProductoTalla(ProductoTallaMapper.toEntity(talla));
+            productoTallaDAO.actualizar(ProductoTallaMapper.toEntity(talla));
         } catch (Exception e) {
             throw new IllegalStateException("No se pudo actualizar el inventario.", e);
         }
@@ -97,5 +101,15 @@ public class ProductoTallaBO implements IProductoTallaBO {
             throw new IllegalArgumentException(
                     "El ID de talla y la cantidad deben ser mayores a cero.");
         }
+    }
+
+    private List<ProductoTallaDTO> convertirListaADTO(List<ProductoTalla> entidades) {
+        List<ProductoTallaDTO> resultado = new ArrayList<>();
+        if (entidades != null) {
+            for (ProductoTalla entidad : entidades) {
+                resultado.add(ProductoTallaMapper.toDTO(entidad));
+            }
+        }
+        return resultado;
     }
 }

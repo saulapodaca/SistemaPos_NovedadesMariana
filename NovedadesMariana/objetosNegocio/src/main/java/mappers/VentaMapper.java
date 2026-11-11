@@ -7,17 +7,15 @@ import dominio.Venta;
 import dtos.DetalleVentaDTO;
 import dtos.PagoDTO;
 import dtos.VentaDTO;
-import interfaces.IFachadaPersistencia;
+import interfaces.IProductoTallaDAO;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 
 /** Mapea la venta transaccional y resuelve la talla antes de enviarla a persistencia. */
 public final class VentaMapper {
     private VentaMapper() { }
 
-    public static Venta toEntity(VentaDTO dto, IFachadaPersistencia persistencia) {
+    public static Venta toEntity(VentaDTO dto, IProductoTallaDAO productoTallaDAO) {
         if (dto == null) return null;
         Venta venta = new Venta();
         if (dto.getId() > 0) venta.setId((long) dto.getId());
@@ -34,7 +32,7 @@ public final class VentaMapper {
         }
         if (dto.getDetalles() != null) {
             for (DetalleVentaDTO detalleDTO : dto.getDetalles()) {
-                ProductoTalla talla = persistencia.buscarProductoTallaPorId((long) detalleDTO.getIdProductoTalla());
+                ProductoTalla talla = productoTallaDAO.buscarProductoTallaPorId((long) detalleDTO.getIdProductoTalla());
                 if (talla == null || talla.getProducto() == null) {
                     throw new IllegalArgumentException("No existe la talla de producto " + detalleDTO.getIdProductoTalla());
                 }
@@ -46,14 +44,7 @@ public final class VentaMapper {
         return venta;
     }
 
-    public static Map<DetalleVenta, Long> tallasPorDetalle(Venta venta, VentaDTO dto) {
-        Map<DetalleVenta, Long> resultado = new IdentityHashMap<>();
-        if (venta == null || dto == null || venta.getDetalles() == null || dto.getDetalles() == null) return resultado;
-        for (int i = 0; i < Math.min(venta.getDetalles().size(), dto.getDetalles().size()); i++) {
-            resultado.put(venta.getDetalles().get(i), (long) dto.getDetalles().get(i).getIdProductoTalla());
-        }
-        return resultado;
-    }
+
 
     /** La entidad DetalleVenta no guarda la talla, por eso el ID de talla no se puede reconstruir al consultar. */
     public static VentaDTO toDTO(Venta venta) {
