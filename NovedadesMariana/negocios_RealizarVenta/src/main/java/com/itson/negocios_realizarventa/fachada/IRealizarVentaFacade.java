@@ -33,6 +33,7 @@ public interface IRealizarVentaFacade {
 
     // Consultas de sesión y ventas
     UsuarioDTO autenticarUsuario(String usuario, String contrasenia);
+    UsuarioDTO obtenerEmpleadoPorId(int id);
     VentaDTO obtenerVentaPorId(int id);
     VentaDTO obtenerVentaPorFolio(String folio);
 }

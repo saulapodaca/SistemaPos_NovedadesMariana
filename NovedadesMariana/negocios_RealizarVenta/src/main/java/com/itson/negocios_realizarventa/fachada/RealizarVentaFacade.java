@@ -125,6 +125,11 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
         return adaptarUsuario(this.gestorEmpleados.autenticar(usuario, contrasenia));
     }
 
+    @Override
+    public UsuarioDTO obtenerEmpleadoPorId(int id) {
+        return adaptarUsuario(this.gestorEmpleados.obtenerPorId(id));
+    }
+
     private ProductoDTO adaptarProducto(IProductoDTO producto) {
         if (producto == null) {
             return null;
