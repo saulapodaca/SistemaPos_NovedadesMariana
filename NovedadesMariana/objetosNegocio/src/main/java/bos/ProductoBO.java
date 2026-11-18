@@ -60,7 +60,11 @@ public class ProductoBO implements IProductoBO {
                     + productoDTO.getCodigoBarras());
         }
         validarCategoriasExistentes(productoDTO.getCategoriasIds());
-        productoDAO.guardar(ProductoMapper.toEntity(productoDTO));
+        Producto entidad = ProductoMapper.toEntity(productoDTO);
+        productoDAO.guardar(entidad);
+        if (entidad.getId() != null) {
+            productoDTO.setId(entidad.getId());
+        }
     }
 
     @Override

@@ -68,6 +68,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
         // Atajos de teclado solicitados
         registrarTecla("F12", navegacion::abrirModalCobro);
         registrarTecla("F4", navegacion::abrirModalDescuento);
+        registrarTecla("F8", navegacion::abrirMenuInventario);
         registrarTecla("ESCAPE", navegacion::cancelarVenta);
         registrarTecla("F5", () -> {
             revision++;
@@ -236,8 +237,9 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
         ));
         cardCliente.setMaximumSize(new Dimension(Short.MAX_VALUE, 54));
 
-        JLabel iconCliente = new JLabel("👤");
-        iconCliente.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        JLabel iconCliente = new JLabel("Cliente:");
+        iconCliente.setFont(new Font("SansSerif", Font.BOLD, 12));
+        iconCliente.setForeground(Estilo.TEXTO_DESCUENTO);
 
         JPanel txtCliente = new JPanel(new GridLayout(2, 1, 0, 1));
         txtCliente.setOpaque(false);
@@ -307,7 +309,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
         col.add(Box.createVerticalStrut(10));
 
         // Botón Cancelar Venta (ESC)
-        JButton btnCancelar = new JButton("✕  Cancelar Venta   [ESC]");
+        JButton btnCancelar = new JButton("Cancelar Venta   [ESC]");
         btnCancelar.setFont(new Font("SansSerif", Font.BOLD, 12));
         btnCancelar.setBackground(Estilo.FONDO_CANCELAR);
         btnCancelar.setForeground(Estilo.ERROR);
@@ -334,7 +336,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
         lblContadorArticulos.setForeground(Estilo.TEXTO_DESCUENTO);
         footer.add(lblContadorArticulos, BorderLayout.WEST);
 
-        JLabel infoTerminal = new JLabel("F5 Actualizar búsqueda · Enter Agregar producto");
+        JLabel infoTerminal = new JLabel("F8 Inventario · F5 Actualizar búsqueda · Enter Agregar producto");
         infoTerminal.setFont(new Font("SansSerif", Font.PLAIN, 12));
         infoTerminal.setForeground(Estilo.TEXTO_DESCUENTO);
         footer.add(infoTerminal, BorderLayout.EAST);
@@ -424,7 +426,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
         tabla.getColumnModel().getColumn(2).setPreferredWidth(80);  // Talla Badge
         tabla.getColumnModel().getColumn(3).setPreferredWidth(90);  // P. Unitario
         tabla.getColumnModel().getColumn(4).setPreferredWidth(90);  // Total
-        tabla.getColumnModel().getColumn(5).setPreferredWidth(45);  // Botón Eliminar [✕]
+        tabla.getColumnModel().getColumn(5).setPreferredWidth(45);  // Botón Eliminar [X]
 
         tabla.getColumnModel().getColumn(0).setCellRenderer(new CeldaCantidadRenderer());
         tabla.getColumnModel().getColumn(0).setCellEditor(new CeldaCantidadEditor());
@@ -539,7 +541,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
                     d.getTalla(),
                     Estilo.dinero(d.getPrecioUnitario()),
                     Estilo.dinero(d.getSubtotal()),
-                    "✕"
+                    "X"
             });
         }
 
@@ -697,7 +699,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
 
     private class CeldaEliminarRenderer extends DefaultTableCellRenderer {
         private final JPanel panel = new JPanel(new GridBagLayout());
-        private final JLabel lblCruz = new JLabel("✕", SwingConstants.CENTER);
+        private final JLabel lblCruz = new JLabel("X", SwingConstants.CENTER);
 
         public CeldaEliminarRenderer() {
             panel.setOpaque(true);
@@ -718,7 +720,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
 
     private class CeldaEliminarEditor extends AbstractCellEditor implements javax.swing.table.TableCellEditor {
         private final JPanel panel = new JPanel(new GridBagLayout());
-        private final JButton btnEliminar = new JButton("✕");
+        private final JButton btnEliminar = new JButton("X");
         private int filaActual;
 
         public CeldaEliminarEditor() {
@@ -740,7 +742,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
             panel.add(btnEliminar);
         }
 
-        @Override public Object getCellEditorValue() { return "✕"; }
+        @Override public Object getCellEditorValue() { return "X"; }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int col) {

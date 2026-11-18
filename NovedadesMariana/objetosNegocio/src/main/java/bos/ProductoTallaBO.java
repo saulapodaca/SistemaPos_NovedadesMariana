@@ -72,6 +72,45 @@ public class ProductoTallaBO implements IProductoTallaBO {
     }
 
     @Override
+    public synchronized boolean ajustarStock(int idProductoTalla, int nuevoStock) {
+        if (idProductoTalla <= 0) {
+            throw new IllegalArgumentException("El ID de la talla debe ser mayor a cero.");
+        }
+        if (nuevoStock < 0) {
+            throw new IllegalArgumentException("El nuevo stock no puede ser un valor negativo.");
+        }
+        ProductoTallaDTO talla = buscarTalla(idProductoTalla);
+        talla.setStockActual(nuevoStock);
+        actualizar(talla);
+        return true;
+    }
+
+    @Override
+    public synchronized void guardarTalla(ProductoTallaDTO talla) throws Exception {
+        if (talla == null) {
+            throw new IllegalArgumentException("La información de la talla no puede ser nula.");
+        }
+        if (talla.getTalla() == null || talla.getTalla().isBlank()) {
+            throw new IllegalArgumentException("El nombre de la talla es obligatorio.");
+        }
+        if (talla.getIdProducto() <= 0) {
+            throw new IllegalArgumentException("El ID del producto asociado debe ser válido.");
+        }
+        if (talla.getStockActual() < 0) {
+            throw new IllegalArgumentException("El stock inicial no puede ser negativo.");
+        }
+        productoTallaDAO.guardar(ProductoTallaMapper.toEntity(talla));
+    }
+
+    @Override
+    public synchronized void eliminarTalla(int idProductoTalla) throws Exception {
+        if (idProductoTalla <= 0) {
+            throw new IllegalArgumentException("El ID de la talla debe ser mayor a cero.");
+        }
+        productoTallaDAO.eliminar((long) idProductoTalla);
+    }
+
+    @Override
     public List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto) {
         if (idProducto <= 0) {
             throw new IllegalArgumentException("El ID de producto debe ser mayor a cero.");

@@ -7,23 +7,30 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import javax.swing.*;
 
-/** Cambia pantallas y administra los diálogos de la venta. */
+/** Cambia pantallas y administra los diálogos de venta e inventario. */
 public final class ControlNavegacion {
     private static ControlNavegacion instance;
     private final FormPrincipal formPrincipal;
     private final ControlRealizarVenta control;
+    private final ControlGestionarInventario controlInventario;
     private PanelVenta panelVenta;
+    private PanelInventario panelInventario;
     private JDialog modal;
     private final EjecutorTareas tareas = new EjecutorTareas();
 
     public ControlNavegacion(FormPrincipal formPrincipal, ControlRealizarVenta control) {
+        this(formPrincipal, control, ControlGestionarInventario.getInstance());
+    }
+
+    public ControlNavegacion(FormPrincipal formPrincipal, ControlRealizarVenta control, ControlGestionarInventario controlInventario) {
         this.formPrincipal = formPrincipal;
         this.control = control;
+        this.controlInventario = controlInventario != null ? controlInventario : ControlGestionarInventario.getInstance();
     }
 
     public static synchronized ControlNavegacion getInstance() {
         if (instance == null) {
-            instance = new ControlNavegacion(new FormPrincipal(), ControlRealizarVenta.getInstance());
+            instance = new ControlNavegacion(new FormPrincipal(), ControlRealizarVenta.getInstance(), ControlGestionarInventario.getInstance());
         }
         return instance;
     }
@@ -33,6 +40,13 @@ public final class ControlNavegacion {
             formPrincipal.mostrarEmpleado(control.getUsuario().getNombres()
                     + " " + control.getUsuario().getPrimerApellido());
         }
+        formPrincipal.setNavegacionListener(modulo -> {
+            if ("VENTAS".equalsIgnoreCase(modulo)) {
+                abrirMenuVentas();
+            } else if ("INVENTARIO".equalsIgnoreCase(modulo)) {
+                abrirMenuInventario();
+            }
+        });
         abrirMenuVentas();
         formPrincipal.setVisible(true);
     }
@@ -41,7 +55,16 @@ public final class ControlNavegacion {
         cerrarModal();
         if (panelVenta != null) panelVenta.detenerBusqueda();
         panelVenta = new PanelVenta(control, this);
+        formPrincipal.seleccionarModulo("VENTAS");
         formPrincipal.mostrarPanel(panelVenta);
+    }
+
+    public void abrirMenuInventario() {
+        cerrarModal();
+        if (panelVenta != null) panelVenta.detenerBusqueda();
+        panelInventario = new PanelInventario(controlInventario, this);
+        formPrincipal.seleccionarModulo("INVENTARIO");
+        formPrincipal.mostrarPanel(panelInventario);
     }
 
     public void abrirModalCobro() {
@@ -105,7 +128,9 @@ public final class ControlNavegacion {
                 "Cancelar venta", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) nuevaVenta();
     }
 
-    public void refrescarVenta() { panelVenta.refrescar(); }
+    public void refrescarVenta() {
+        if (panelVenta != null) panelVenta.refrescar();
+    }
 
     public void cerrarModal() {
         if (tareas.estaOcupado()) return;
@@ -115,7 +140,7 @@ public final class ControlNavegacion {
         }
     }
 
-    private void mostrarModal(String titulo, JPanel contenido, int ancho, int alto) {
+    public void mostrarModal(String titulo, JPanel contenido, int ancho, int alto) {
         modal = new JDialog(formPrincipal, titulo, true);
         modal.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         modal.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -130,6 +155,7 @@ public final class ControlNavegacion {
     public <T> void ejecutar(Callable<T> tarea, Consumer<T> completado) {
         tareas.ejecutar(modal == null ? formPrincipal : modal, tarea, completado, this::error);
     }
+
     public void error(Throwable error) {
         String mensaje = error.getMessage();
         JOptionPane.showMessageDialog(modal == null ? formPrincipal : modal,
@@ -139,4 +165,6 @@ public final class ControlNavegacion {
 
     public void informar(String mensaje) { JOptionPane.showMessageDialog(formPrincipal, mensaje); }
     public boolean estaOcupado() { return tareas.estaOcupado(); }
+    public ControlGestionarInventario getControlInventario() { return controlInventario; }
+    public FormPrincipal getFormPrincipal() { return formPrincipal; }
 }
