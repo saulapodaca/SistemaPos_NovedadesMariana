@@ -6,6 +6,7 @@ package interfaces;
 
 import dominio.DetalleVenta;
 import dominio.Venta;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ public interface IVentaDAO {
     Venta buscarVentaPorId(Long id);
     Venta buscarPorFolio(String folio);
     List<Venta> obtenerTodas();
+    List<Venta> obtenerEntre(LocalDateTime inicio, LocalDateTime fin);
     boolean cancelar(Long id) throws Exception;
     void guardarConTallas(
     Venta venta, Map<DetalleVenta, Long> tallasPorDetalle) throws Exception;

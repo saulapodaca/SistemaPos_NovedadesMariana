@@ -104,6 +104,23 @@ public class VentaBO implements IVentaBO {
     }
 
     @Override
+    public List<VentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin) {
+        if (inicio == null || fin == null || !inicio.isBefore(fin)) {
+            throw new IllegalArgumentException(
+                    "El inicio y el fin del periodo deben ser válidos, y el inicio debe ser anterior al fin.");
+        }
+        try {
+            return ventaDAO.obtenerEntre(inicio, fin).stream()
+                    .map(VentaMapper::toDTO)
+                    .toList();
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudieron consultar las ventas del periodo.", e);
+        }
+    }
+
+    @Override
     public ResumenVentaDTO calcularTotales(List<DetalleVentaDTO> detalles, float descuento) {
         if (detalles == null || detalles.isEmpty()) {
             throw new IllegalArgumentException("La venta debe incluir al menos un detalle.");

@@ -13,6 +13,7 @@ import interfaces.IVentaDTO;
 import interfaces.IVentaBO;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -45,6 +46,11 @@ public class GestorVentas implements IGestorVentas {
     @Override
     public IVentaDTO obtenerVentaPorFolio(String folio) {
         return this.ventaBO.obtenerPorFolio(folio);
+    }
+
+    @Override
+    public List<IVentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin) {
+        return new ArrayList<>(this.ventaBO.obtenerVentasEntre(inicio, fin));
     }
 
     @Override

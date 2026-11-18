@@ -7,6 +7,7 @@ package interfaces;
 import dtos.DetalleVentaDTO;
 import dtos.ResumenVentaDTO;
 import dtos.VentaDTO;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -19,6 +20,8 @@ public interface IVentaBO {
     VentaDTO obtenerPorId(int id);
 
     VentaDTO obtenerPorFolio(String folio);
+
+    List<VentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin);
 
     ResumenVentaDTO calcularTotales(List<DetalleVentaDTO> detalles, float descuento);
 

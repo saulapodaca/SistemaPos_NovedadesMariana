@@ -7,6 +7,7 @@ package com.itson.negocios_gestorventas;
 import interfaces.IDetalleVentaDTO;
 import interfaces.IResumenVentaDTO;
 import interfaces.IVentaDTO;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -19,6 +20,8 @@ public interface IGestorVentas {
     IVentaDTO obtenerVentaPorId(int id);
 
     IVentaDTO obtenerVentaPorFolio(String folio);
+
+    List<IVentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin);
 
     IResumenVentaDTO calcularTotales(
             List<? extends IDetalleVentaDTO> detalles, float descuento);

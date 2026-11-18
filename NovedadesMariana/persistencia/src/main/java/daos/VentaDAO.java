@@ -11,6 +11,7 @@ import conexion.ConexionJPA;
 import interfaces.IVentaDAO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -320,6 +321,34 @@ public class VentaDAO implements IVentaDAO {
                 Venta.class
             ).getResultList();
 
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<Venta> obtenerEntre(LocalDateTime inicio, LocalDateTime fin) {
+        if (inicio == null || fin == null || !inicio.isBefore(fin)) {
+            throw new IllegalArgumentException(
+                "El inicio y el fin del periodo deben ser válidos, y el inicio debe ser anterior al fin."
+            );
+        }
+
+        EntityManager em = conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT DISTINCT v FROM Venta v " +
+                "JOIN FETCH v.usuario " +
+                "JOIN FETCH v.pago " +
+                "LEFT JOIN FETCH v.detalles d " +
+                "LEFT JOIN FETCH d.producto " +
+                "WHERE v.fechaHora >= :inicio AND v.fechaHora < :fin " +
+                "ORDER BY v.fechaHora, v.id",
+                Venta.class
+            )
+            .setParameter("inicio", inicio)
+            .setParameter("fin", fin)
+            .getResultList();
         } finally {
             em.close();
         }
