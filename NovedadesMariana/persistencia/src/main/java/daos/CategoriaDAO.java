@@ -35,10 +35,6 @@ public class CategoriaDAO implements ICategoriaDAO {
 
             Categoria existente = em.find(Categoria.class, categoria.getId());
 
-            if (existente == null) {
-                throw new Exception("La categoría no existe.");
-            }
-
             existente.setNombre(categoria.getNombre());
             existente.setDescripcion(categoria.getDescripcion());
 
@@ -60,23 +56,6 @@ public class CategoriaDAO implements ICategoriaDAO {
             em.getTransaction().begin();
 
             Categoria categoria = em.find(Categoria.class, id);
-
-            if (categoria == null) {
-                throw new Exception("La categoría no existe.");
-            }
-
-            Long cantidadProductos = em.createQuery(
-                "SELECT COUNT(p) FROM Producto p " +
-                "JOIN p.categorias c " +
-                "WHERE c.id = :id",
-                Long.class
-            )
-            .setParameter("id", id)
-            .getSingleResult();
-
-            if (cantidadProductos > 0) {
-                throw new Exception("No se puede eliminar la categoría porque tiene productos asociados.");
-            }
 
             em.remove(categoria);
             em.getTransaction().commit();
@@ -109,6 +88,23 @@ public class CategoriaDAO implements ICategoriaDAO {
                 "SELECT c FROM Categoria c",
                 Categoria.class
             ).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public long contarProductos(Long id) {
+        EntityManager em = conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT COUNT(p) FROM Producto p " +
+                    "JOIN p.categorias c " +
+                    "WHERE c.id = :id",
+                    Long.class
+                )
+                .setParameter("id", id)
+                .getSingleResult();
         } finally {
             em.close();
         }

@@ -21,11 +21,6 @@ import dtos.ProductoTallaDTO;
 import dtos.ResumenVentaDTO;
 import dtos.UsuarioDTO;
 import dtos.VentaDTO;
-import interfaces.IProductoDTO;
-import interfaces.IProductoTallaDTO;
-import interfaces.IResumenVentaDTO;
-import interfaces.IUsuarioDTO;
-import interfaces.IVentaDTO;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -79,12 +74,12 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
 
     @Override
     public List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto) {
-        List<? extends IProductoTallaDTO> tallas = this.gestorInventario.obtenerTallasPorProducto(idProducto);
+        List<? extends ProductoTallaDTO> tallas = this.gestorInventario.obtenerTallasPorProducto(idProducto);
         if (tallas == null) {
             return null;
         }
         List<ProductoTallaDTO> resultado = new ArrayList<>();
-        for (IProductoTallaDTO talla : tallas) {
+        for (ProductoTallaDTO talla : tallas) {
             resultado.add(talla == null ? null : new ProductoTallaDTO(
                     talla.getId(), talla.getIdProducto(), talla.getTalla(), talla.getStockActual()));
         }
@@ -99,7 +94,7 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
     // --- Métodos delegados a GestorVentas ---
     @Override
     public ResumenVentaDTO calcularTotales(List<DetalleVentaDTO> detalles, float descuento) {
-        IResumenVentaDTO resumen = this.gestorVentas.calcularTotales(detalles, descuento);
+        ResumenVentaDTO resumen = this.gestorVentas.calcularTotales(detalles, descuento);
         return resumen == null ? null : new ResumenVentaDTO(
                 resumen.getSubtotal(), resumen.getIva(), resumen.getDescuento(), resumen.getTotal());
     }
@@ -125,7 +120,7 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
         return adaptarUsuario(this.gestorEmpleados.autenticar(usuario, contrasenia));
     }
 
-    private ProductoDTO adaptarProducto(IProductoDTO producto) {
+    private ProductoDTO adaptarProducto(ProductoDTO producto) {
         if (producto == null) {
             return null;
         }
@@ -135,7 +130,7 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
                         ? null : new HashSet<>(producto.getCategoriasIds()));
     }
 
-    private VentaDTO adaptarVenta(IVentaDTO venta) {
+    private VentaDTO adaptarVenta(VentaDTO venta) {
         if (venta == null) {
             return null;
         }
@@ -144,7 +139,7 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
                 venta.getIdUsuario(), venta.getDetalles(), venta.getPagos());
     }
 
-    private UsuarioDTO adaptarUsuario(IUsuarioDTO usuario) {
+    private UsuarioDTO adaptarUsuario(UsuarioDTO usuario) {
         if (usuario == null) {
             return null;
         }
@@ -155,9 +150,9 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
     @Override
     public List<ProductoDTO> buscarProductos(String criterio) {
         List<ProductoDTO> resultado = new ArrayList<>();
-        List<? extends IProductoDTO> productos = gestorInventario.buscarProductos(criterio);
+        List<ProductoDTO> productos = gestorInventario.buscarProductos(criterio);
         if (productos != null) {
-            for (IProductoDTO producto : productos) {
+            for (ProductoDTO producto : productos) {
                 if (producto != null) resultado.add(adaptarProducto(producto));
             }
         }
@@ -166,7 +161,7 @@ public class RealizarVentaFacade implements IRealizarVentaFacade {
     @Override
     public List<ProductoDTO> buscarProductosPorCategoria(String nombre) {
         List<ProductoDTO> productos = new ArrayList<>();
-        for (IProductoDTO producto : gestorInventario.buscarProductosPorCategoria(nombre)) {
+        for (ProductoDTO producto : gestorInventario.buscarProductosPorCategoria(nombre)) {
             productos.add(adaptarProducto(producto));
         }
         return productos;

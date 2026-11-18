@@ -4,10 +4,12 @@
  */
 package interfaces;
 
-import dominio.DetalleVenta;
+import dominio.ProductoTalla;
 import dominio.Venta;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  *
@@ -21,6 +23,7 @@ public interface IVentaDAO {
     Venta buscarPorFolio(String folio);
     List<Venta> obtenerTodas();
     boolean cancelar(Long id) throws Exception;
-    void guardarConTallas(
-    Venta venta, Map<DetalleVenta, Long> tallasPorDetalle) throws Exception;
+    /** Ejecuta la actualización sobre las tallas bloqueadas dentro de la transacción de venta. */
+    void guardarConTallas(Venta venta, Set<Long> idsTalla,
+            Consumer<Map<Long, ProductoTalla>> actualizarTallas) throws Exception;
 }

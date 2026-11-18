@@ -4,13 +4,12 @@
  */
 package dtos;
 
-import interfaces.IUsuarioDTO;
 
 /**
  *
  * @author saula
  */
-public class UsuarioDTO implements IUsuarioDTO {
+public class UsuarioDTO{
     
     private Long id;
     private String usuario;

@@ -4,13 +4,12 @@
  */
 package dtos;
 
-import interfaces.IProductoTallaDTO;
 
 /**
  *
  * @author saula
  */
-public class ProductoTallaDTO implements IProductoTallaDTO {
+public class ProductoTallaDTO {
     private int id;
     private int idProducto;
     private String talla;

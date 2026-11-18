@@ -18,30 +18,15 @@ public class DetalleVentaDAO implements IDetalleVentaDAO {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarDetalle(detalle);
-
             em.getTransaction().begin();
 
-            if (detalle.getVenta() == null ||
-                detalle.getVenta().getId() == null) {
-                throw new Exception(
-                    "La venta debe estar registrada."
-                );
-            }
-
-            Venta venta = em.find(
+            Venta venta = em.getReference(
                 Venta.class, detalle.getVenta().getId()
             );
 
-            Producto producto = em.find(
+            Producto producto = em.getReference(
                 Producto.class, detalle.getProducto().getId()
             );
-
-            if (venta == null || producto == null) {
-                throw new Exception(
-                    "La venta o el producto no existe."
-                );
-            }
 
             detalle.setVenta(venta);
             detalle.setProducto(producto);
@@ -70,35 +55,15 @@ public class DetalleVentaDAO implements IDetalleVentaDAO {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarDetalle(detalle);
-
-            if (detalle.getId() == null) {
-                throw new Exception(
-                    "El detalle debe tener un ID."
-                );
-            }
-
             em.getTransaction().begin();
 
             DetalleVenta existente = em.find(
                 DetalleVenta.class, detalle.getId()
             );
 
-            if (existente == null) {
-                throw new Exception(
-                    "El detalle de venta no existe."
-                );
-            }
-
-            Producto producto = em.find(
+            Producto producto = em.getReference(
                 Producto.class, detalle.getProducto().getId()
             );
-
-            if (producto == null) {
-                throw new Exception(
-                    "El producto no existe."
-                );
-            }
 
             existente.setCantidad(detalle.getCantidad());
             existente.setPrecioUnitario(detalle.getPrecioUnitario());
@@ -132,12 +97,6 @@ public class DetalleVentaDAO implements IDetalleVentaDAO {
             DetalleVenta detalle = em.find(
                 DetalleVenta.class, id
             );
-
-            if (detalle == null) {
-                throw new Exception(
-                    "El detalle de venta no existe."
-                );
-            }
 
             em.remove(detalle);
 
@@ -186,36 +145,4 @@ public class DetalleVentaDAO implements IDetalleVentaDAO {
     }
 
 
-    private void validarDetalle(DetalleVenta detalle) {
-
-        if (detalle == null) {
-            throw new IllegalArgumentException(
-                "El detalle no puede ser nulo."
-            );
-        }
-
-        if (detalle.getProducto() == null ||
-            detalle.getProducto().getId() == null) {
-            throw new IllegalArgumentException(
-                "Debe seleccionar un producto registrado."
-            );
-        }
-
-        if (detalle.getCantidad() <= 0) {
-            throw new IllegalArgumentException(
-                "La cantidad debe ser mayor a cero."
-            );
-        }
-
-        if (Float.isNaN(detalle.getPrecioUnitario()) ||
-            Float.isInfinite(detalle.getPrecioUnitario()) ||
-            detalle.getPrecioUnitario() < 0 ||
-            Float.isNaN(detalle.getSubtotal()) ||
-            Float.isInfinite(detalle.getSubtotal()) ||
-            detalle.getSubtotal() < 0) {
-            throw new IllegalArgumentException(
-                "Los importes deben ser validos y no negativos."
-            );
-        }
-    }
 }

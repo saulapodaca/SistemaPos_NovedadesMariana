@@ -4,8 +4,8 @@
  */
 package com.itson.negocios_gestorinventario;
 
-import interfaces.IProductoDTO;
-import interfaces.IProductoTallaDTO;
+import dtos.ProductoDTO;
+import dtos.ProductoTallaDTO;
 import java.util.List;
 
 /**
@@ -13,19 +13,19 @@ import java.util.List;
  * @author saula
  */
 public interface IGestorInventario {
-    IProductoDTO buscarProductoPorCodigo(String codigo);
+    ProductoDTO buscarProductoPorCodigo(String codigo);
 
-    IProductoDTO obtenerProductoPorId(int id);
+    ProductoDTO obtenerProductoPorId(int id);
 
-    List<? extends IProductoDTO> listarProductosPorCategoria(int idCategoria);
+    List<ProductoDTO> listarProductosPorCategoria(int idCategoria);
 
-    List<? extends IProductoTallaDTO> obtenerTallasPorProducto(int idProducto);
+    List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto);
 
     boolean validarStockDisponible(int idProductoTalla, int cantidad);
 
     boolean descontarStock(int idProductoTalla, int cantidad);
 
     boolean reabastecerStock(int idProductoTalla, int cantidad);
-    List<? extends IProductoDTO> buscarProductos(String criterio);
-    List<? extends IProductoDTO> buscarProductosPorCategoria(String nombre);
+    List<ProductoDTO> buscarProductos(String criterio);
+    List<ProductoDTO> buscarProductosPorCategoria(String nombre);
 }

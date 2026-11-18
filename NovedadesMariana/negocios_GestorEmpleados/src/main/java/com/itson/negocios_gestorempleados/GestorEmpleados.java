@@ -5,8 +5,9 @@
 package com.itson.negocios_gestorempleados;
 
 import bos.UsuarioBO;
-import interfaces.IUsuarioDTO;
+import dtos.UsuarioDTO;
 import interfaces.IUsuarioBO;
+import java.util.List;
 
 /**
  *
@@ -20,7 +21,7 @@ public class GestorEmpleados implements IGestorEmpleados {
     }
 
     @Override
-    public IUsuarioDTO autenticar(String usuario, String contrasenia) {
+    public UsuarioDTO autenticar(String usuario, String contrasenia) {
         try {
             return this.usuarioBO.autenticar(usuario, contrasenia);
         } catch (Exception e) {
@@ -29,7 +30,7 @@ public class GestorEmpleados implements IGestorEmpleados {
     }
 
     @Override
-    public IUsuarioDTO obtenerPorId(int id) {
+    public UsuarioDTO obtenerPorId(int id) {
         try {
             return this.usuarioBO.buscarPorId((long) id);
         } catch (Exception e) {
@@ -38,11 +39,31 @@ public class GestorEmpleados implements IGestorEmpleados {
     }
 
     @Override
-    public IUsuarioDTO obtenerPorUsuario(String usuario) {
+    public UsuarioDTO obtenerPorUsuario(String usuario) {
         try {
             return this.usuarioBO.buscarPorUsuario(usuario);
         } catch (Exception e) {
             throw new IllegalStateException("No se pudo consultar al empleado.", e);
         }
+    }
+
+    @Override
+    public List<UsuarioDTO> listarEmpleados() throws Exception {
+        return this.usuarioBO.obtenerTodos();
+    }
+
+    @Override
+    public void agregarEmpleado(UsuarioDTO usuario) throws Exception {
+        this.usuarioBO.guardar(usuario);
+    }
+
+    @Override
+    public void modificarEmpleado(UsuarioDTO usuario) throws Exception {
+        this.usuarioBO.actualizar(usuario);
+    }
+
+    @Override
+    public void eliminarEmpleado(Long id) throws Exception {
+        this.usuarioBO.eliminar(id);
     }
 }
