@@ -69,6 +69,7 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
         registrarTecla("F12", navegacion::abrirModalCobro);
         registrarTecla("F4", navegacion::abrirModalDescuento);
         registrarTecla("ESCAPE", navegacion::cancelarVenta);
+        registrarTecla("F8", navegacion::abrirReportes);
         registrarTecla("F5", () -> {
             revision++;
             buscar();
@@ -334,10 +335,26 @@ private final java.util.Map<Integer, String> skuPorTalla = new java.util.HashMap
         lblContadorArticulos.setForeground(Estilo.TEXTO_DESCUENTO);
         footer.add(lblContadorArticulos, BorderLayout.WEST);
 
-        JLabel infoTerminal = new JLabel("F5 Actualizar búsqueda · Enter Agregar producto");
+        JLabel infoTerminal = new JLabel("F5 Actualizar búsqueda · Enter Agregar producto · F8 Reportes");
         infoTerminal.setFont(new Font("SansSerif", Font.PLAIN, 12));
         infoTerminal.setForeground(Estilo.TEXTO_DESCUENTO);
-        footer.add(infoTerminal, BorderLayout.EAST);
+
+        JButton btnReportes = new JButton("Reportes de ventas");
+        btnReportes.setFont(new Font("SansSerif", Font.BOLD, 12));
+        btnReportes.setBackground(Color.WHITE);
+        btnReportes.setForeground(Estilo.AZUL);
+        btnReportes.setFocusPainted(false);
+        btnReportes.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnReportes.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Estilo.BORDE_TARJETA, 1, true),
+                new EmptyBorder(6, 12, 6, 12)));
+        btnReportes.addActionListener(e -> navegacion.abrirReportes());
+
+        JPanel derecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        derecha.setOpaque(false);
+        derecha.add(infoTerminal);
+        derecha.add(btnReportes);
+        footer.add(derecha, BorderLayout.EAST);
 
         return footer;
     }

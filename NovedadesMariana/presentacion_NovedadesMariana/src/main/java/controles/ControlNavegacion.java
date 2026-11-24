@@ -44,6 +44,14 @@ public final class ControlNavegacion {
         formPrincipal.mostrarPanel(panelVenta);
     }
 
+    public void abrirReportes() {
+        if (tareas.estaOcupado()) return;
+        cerrarModal();
+        if (panelVenta != null) panelVenta.detenerBusqueda();
+        panelVenta = null;
+        formPrincipal.mostrarPanel(new PanelReportes(ControlGenerarReporte.getInstance(), this));
+    }
+
     public void abrirModalCobro() {
         if (tareas.estaOcupado()) return;
         if (control.getVenta().getDetalles().isEmpty()) {
