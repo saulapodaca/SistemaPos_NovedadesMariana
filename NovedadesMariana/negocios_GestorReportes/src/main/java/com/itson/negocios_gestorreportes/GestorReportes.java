@@ -3,7 +3,7 @@ package com.itson.negocios_gestorreportes;
 import com.itson.negocios_gestorventas.GestorVentas;
 import com.itson.negocios_gestorventas.IGestorVentas;
 import dtos.DetalleVentaDTO;
-import interfaces.IVentaDTO;
+import dtos.VentaDTO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.Normalizer;
@@ -70,13 +70,13 @@ public class GestorReportes implements IGestorReportes {
             default -> throw new IllegalArgumentException("El periodo de reporte no es válido.");
         }
 
-        List<IVentaDTO> ventas = gestorVentas.obtenerVentasEntre(
+        List<VentaDTO> ventas = gestorVentas.obtenerVentasEntre(
                 inicio.atStartOfDay(), fin.atStartOfDay());
         return crearPdf(periodo, inicio, fin, ventas);
     }
 
     private byte[] crearPdf(PeriodoReporte periodo, LocalDate inicio,
-            LocalDate fin, List<IVentaDTO> ventas) {
+            LocalDate fin, List<VentaDTO> ventas) {
         String descripcionPeriodo = describirPeriodo(periodo, inicio, fin);
         try (PDDocument documento = new PDDocument();
                 ByteArrayOutputStream salida = new ByteArrayOutputStream()) {
@@ -118,14 +118,14 @@ public class GestorReportes implements IGestorReportes {
             nuevaPagina(false);
         }
 
-        private void renderizar(List<IVentaDTO> ventas) throws IOException {
+        private void renderizar(List<VentaDTO> ventas) throws IOException {
             dibujarResumen(ventas);
             if (ventas == null || ventas.stream().noneMatch(Objects::nonNull)) {
                 asegurarEspacio(30.0f);
                 texto("No se encontraron ventas en este periodo.", MARGEN, y, normal, 11.0f);
                 y -= 24.0f;
             } else {
-                for (IVentaDTO venta : ventas) {
+                for (VentaDTO venta : ventas) {
                     if (venta != null) {
                         dibujarVenta(venta);
                     }
@@ -146,13 +146,13 @@ public class GestorReportes implements IGestorReportes {
             y = altoPagina - 130.0f;
         }
 
-        private void dibujarResumen(List<IVentaDTO> ventas) throws IOException {
+        private void dibujarResumen(List<VentaDTO> ventas) throws IOException {
             float subtotal = 0.0f;
             float iva = 0.0f;
             float total = 0.0f;
             long cantidad = 0;
             if (ventas != null) {
-                for (IVentaDTO venta : ventas) {
+                for (VentaDTO venta : ventas) {
                     if (venta != null) {
                         cantidad++;
                         subtotal += venta.getSubtotal();
@@ -187,7 +187,7 @@ public class GestorReportes implements IGestorReportes {
             texto(valor, x + 8.0f, y - 35.0f, negrita, 11.0f);
         }
 
-        private void dibujarVenta(IVentaDTO venta) throws IOException {
+        private void dibujarVenta(VentaDTO venta) throws IOException {
             asegurarEspacio(76.0f);
             texto("Folio: " + valor(venta.getFolio(), "SIN FOLIO"), MARGEN, y, negrita, 10.0f);
             String fecha = venta.getFechaHora() == null

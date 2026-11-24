@@ -4,9 +4,6 @@
  */
 package com.itson.negocios_gestorventas;
 
-import interfaces.IDetalleVentaDTO;
-import interfaces.IResumenVentaDTO;
-import interfaces.IVentaDTO;
 import java.time.LocalDateTime;
 
 import dtos.DetalleVentaDTO;
@@ -26,10 +23,10 @@ public interface IGestorVentas {
 
     VentaDTO obtenerVentaPorFolio(String folio);
 
-    List<IVentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin);
+    List<VentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin);
 
-    IResumenVentaDTO calcularTotales(
-            List<? extends IDetalleVentaDTO> detalles, float descuento);
+    ResumenVentaDTO calcularTotales(
+            List<DetalleVentaDTO> detalles, float descuento);
 
     boolean cancelarVenta(int idVenta);
 }

@@ -7,9 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import dtos.DetalleVentaDTO;
 import dtos.ResumenVentaDTO;
 import dtos.VentaDTO;
-import interfaces.IDetalleVentaDTO;
-import interfaces.IResumenVentaDTO;
-import interfaces.IVentaDTO;
 import com.itson.negocios_gestorventas.IGestorVentas;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +75,7 @@ class GestorReportesTest {
 
     @Test
     void divideUnReporteLargoEnVariasPaginas() throws IOException {
-        List<IVentaDTO> muchasVentas = new ArrayList<>();
+        List<VentaDTO> muchasVentas = new ArrayList<>();
         for (int i = 1; i <= 35; i++) {
             muchasVentas.add(venta(String.format("VEN-%05d", i), "Blusa", 100.0f, 16.0f, 116.0f));
         }
@@ -114,39 +111,39 @@ class GestorReportesTest {
 
     private static final class GestorVentasFalso implements IGestorVentas {
 
-        private final List<IVentaDTO> resultado;
+        private final List<VentaDTO> resultado;
         private LocalDateTime inicio;
         private LocalDateTime fin;
 
-        private GestorVentasFalso(List<? extends IVentaDTO> resultado) {
+        private GestorVentasFalso(List<VentaDTO> resultado) {
             this.resultado = new ArrayList<>(resultado);
         }
 
         @Override
-        public IVentaDTO registrarVenta(IVentaDTO venta) {
+        public VentaDTO registrarVenta(VentaDTO venta) {
             return venta;
         }
 
         @Override
-        public IVentaDTO obtenerVentaPorId(int id) {
+        public VentaDTO obtenerVentaPorId(int id) {
             return null;
         }
 
         @Override
-        public IVentaDTO obtenerVentaPorFolio(String folio) {
+        public VentaDTO obtenerVentaPorFolio(String folio) {
             return null;
         }
 
         @Override
-        public List<IVentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin) {
+        public List<VentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin) {
             this.inicio = inicio;
             this.fin = fin;
             return resultado;
         }
 
         @Override
-        public IResumenVentaDTO calcularTotales(
-                List<? extends IDetalleVentaDTO> detalles, float descuento) {
+        public ResumenVentaDTO calcularTotales(
+                List<DetalleVentaDTO> detalles, float descuento) {
             return new ResumenVentaDTO();
         }
 

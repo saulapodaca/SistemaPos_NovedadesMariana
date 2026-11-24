@@ -47,13 +47,13 @@ public class GestorVentas implements IGestorVentas {
     }
 
     @Override
-    public List<IVentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin) {
+    public List<VentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin) {
         return new ArrayList<>(this.ventaBO.obtenerVentasEntre(inicio, fin));
     }
 
     @Override
-    public IResumenVentaDTO calcularTotales(
-            List<? extends IDetalleVentaDTO> detalles, float descuento) {
+    public ResumenVentaDTO calcularTotales(
+            List<DetalleVentaDTO> detalles, float descuento) {
         if (detalles == null) {
             return this.ventaBO.calcularTotales(null, descuento);
         }
