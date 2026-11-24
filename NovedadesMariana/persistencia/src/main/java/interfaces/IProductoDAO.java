@@ -22,4 +22,5 @@ public interface IProductoDAO {
     public List<Producto> listarProductosPorCategoria(Long idCategoria);
     public List<Producto> buscarProductos(String criterio);
     
+    long contarDetallesVenta(Long id);
 }

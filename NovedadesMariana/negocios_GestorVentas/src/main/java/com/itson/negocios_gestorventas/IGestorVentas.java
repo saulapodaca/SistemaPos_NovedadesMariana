@@ -8,6 +8,11 @@ import interfaces.IDetalleVentaDTO;
 import interfaces.IResumenVentaDTO;
 import interfaces.IVentaDTO;
 import java.time.LocalDateTime;
+
+import dtos.DetalleVentaDTO;
+import dtos.ResumenVentaDTO;
+import dtos.VentaDTO;
+
 import java.util.List;
 
 /**
@@ -15,11 +20,11 @@ import java.util.List;
  * @author saula
  */
 public interface IGestorVentas {
-    IVentaDTO registrarVenta(IVentaDTO venta);
+    VentaDTO registrarVenta(VentaDTO venta);
 
-    IVentaDTO obtenerVentaPorId(int id);
+    VentaDTO obtenerVentaPorId(int id);
 
-    IVentaDTO obtenerVentaPorFolio(String folio);
+    VentaDTO obtenerVentaPorFolio(String folio);
 
     List<IVentaDTO> obtenerVentasEntre(LocalDateTime inicio, LocalDateTime fin);
 

@@ -18,4 +18,5 @@ public interface IPagoDAO {
     Pago buscarPorId(Long id);
     Pago buscarPorVenta(Long idVenta);
     List<Pago> obtenerTodos();
+    long contarVentas(Long idPago);
 }

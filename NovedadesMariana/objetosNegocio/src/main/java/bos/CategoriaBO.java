@@ -82,6 +82,9 @@ public class CategoriaBO implements ICategoriaBO {
             throw new IllegalArgumentException("No se puede eliminar: la categoría con ID " + id + " no existe.");
         }
 
+        if (categoriaDAO.contarProductos(id) > 0) {
+            throw new IllegalStateException("No se puede eliminar la categoría porque tiene productos asociados.");
+        }
         categoriaDAO.eliminar(id);
     }
 

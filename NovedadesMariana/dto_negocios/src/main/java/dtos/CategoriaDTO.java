@@ -4,13 +4,12 @@
  */
 package dtos;
 
-import interfaces.ICategoriaDTO;
 
 /**
  *
  * @author saula
  */
-public class CategoriaDTO implements ICategoriaDTO {
+public class CategoriaDTO {
     private Long id;
     private String nombre;
     private String descripcion;

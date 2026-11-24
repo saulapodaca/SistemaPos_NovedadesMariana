@@ -15,7 +15,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.Consumer;
 
 public class VentaDAO implements IVentaDAO {
 
@@ -24,74 +27,41 @@ public class VentaDAO implements IVentaDAO {
     @Override
     public void guardar(Venta venta) throws Exception {
         // Guarda la venta, pero no descuenta inventario.
-        registrarVenta(venta, null);
+        guardarConTallas(venta, Set.of(), tallas -> {});
     }
 
-    // Registrar venta con descuento de inventario
-    public void guardarConTallas(
-            Venta venta,
-            Map<DetalleVenta, Long> tallasPorDetalle)
-            throws Exception {
-
-        if (tallasPorDetalle == null) {
-            throw new IllegalArgumentException(
-                "Debe indicar las tallas vendidas."
-            );
-        }
-
-        registrarVenta(venta, tallasPorDetalle);
-    }
-
-    private void registrarVenta(
-            Venta venta,
-            Map<DetalleVenta, Long> tallasPorDetalle)
-            throws Exception {
-
+    @Override
+    public void guardarConTallas(Venta venta, Set<Long> idsTalla,
+            Consumer<Map<Long, ProductoTalla>> actualizarTallas) throws Exception {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarVenta(venta);
-
             em.getTransaction().begin();
 
-            // Verificar usuario
-            Usuario usuario = em.find(
+            // Asociar usuario
+            Usuario usuario = em.getReference(
                 Usuario.class, venta.getUsuario().getId()
             );
 
-            if (usuario == null) {
-                throw new Exception(
-                    "El usuario no existe."
-                );
-            }
-
             venta.setUsuario(usuario);
 
-            // Verificar productos de la venta
+            // Asociar productos de la venta
             for (DetalleVenta detalle : venta.getDetalles()) {
 
-                Producto producto = em.find(
+                Producto producto = em.getReference(
                     Producto.class,
                     detalle.getProducto().getId()
                 );
-
-                if (producto == null) {
-                    throw new Exception(
-                        "Uno de los productos no existe."
-                    );
-                }
 
                 detalle.setProducto(producto);
                 detalle.setVenta(venta);
             }
 
-            // Descontar existencias cuando se indiquen
-            // las tallas correspondientes.
-            if (tallasPorDetalle != null) {
-                descontarInventario(
-                    em, venta, tallasPorDetalle
-                );
+            Map<Long, ProductoTalla> tallas = new TreeMap<>();
+            for (Long id : new TreeSet<>(idsTalla)) {
+                tallas.put(id, em.find(ProductoTalla.class, id, LockModeType.PESSIMISTIC_WRITE));
             }
+            actualizarTallas.accept(tallas);
 
             // Guarda venta, detalles y pago por cascada
             em.persist(venta);
@@ -103,6 +73,9 @@ public class VentaDAO implements IVentaDAO {
                 em.getTransaction().rollback();
             }
 
+            if (e instanceof IllegalArgumentException || e instanceof IllegalStateException) {
+                throw e;
+            }
             throw new Exception(
                 "Error al registrar venta: "
                 + e.getMessage(), e
@@ -113,118 +86,18 @@ public class VentaDAO implements IVentaDAO {
         }
     }
 
-    // Descontar inventario dentro de la transaccion
-    private void descontarInventario(
-            EntityManager em,
-            Venta venta,
-            Map<DetalleVenta, Long> tallasPorDetalle)
-            throws Exception {
-
-        if (tallasPorDetalle.size()
-                != venta.getDetalles().size()) {
-            throw new Exception(
-                "Debe seleccionar una talla para cada detalle."
-            );
-        }
-
-        // Agrupar cantidades por talla
-        Map<Long, Integer> cantidades = new TreeMap<>();
-        Map<Long, Long> productosPorTalla = new HashMap<>();
-
-        for (DetalleVenta detalle : venta.getDetalles()) {
-
-            Long idTalla = tallasPorDetalle.get(detalle);
-
-            if (idTalla == null) {
-                throw new Exception(
-                    "Falta seleccionar la talla de un producto."
-                );
-            }
-
-            Long idProducto = detalle.getProducto().getId();
-
-            Long anterior = productosPorTalla.putIfAbsent(
-                idTalla, idProducto
-            );
-
-            if (anterior != null &&
-                !anterior.equals(idProducto)) {
-                throw new Exception(
-                    "Una talla no corresponde al producto."
-                );
-            }
-
-            cantidades.merge(
-                idTalla,
-                detalle.getCantidad(),
-                (a, b) -> Math.addExact(a, b)
-            );
-        }
-
-        // Bloquear y actualizar existencias
-        for (Map.Entry<Long, Integer> entrada
-                : cantidades.entrySet()) {
-
-            Long idTalla = entrada.getKey();
-            int cantidad = entrada.getValue();
-
-            ProductoTalla talla = em.find(
-                ProductoTalla.class,
-                idTalla,
-                LockModeType.PESSIMISTIC_WRITE
-            );
-
-            if (talla == null) {
-                throw new Exception(
-                    "La talla seleccionada no existe."
-                );
-            }
-
-            if (!talla.getProducto().getId().equals(
-                    productosPorTalla.get(idTalla))) {
-                throw new Exception(
-                    "La talla no pertenece al producto."
-                );
-            }
-
-            if (talla.getStockActual() < cantidad) {
-                throw new Exception(
-                    "Stock insuficiente para la talla "
-                    + talla.getTalla()
-                );
-            }
-
-            talla.setStockActual(
-                talla.getStockActual() - cantidad
-            );
-        }
-    }
-
     @Override
     public void actualizar(Venta venta) throws Exception {
-        throw new Exception(
-            "No se permite modificar ventas registradas. "
-            + "Se requiere un proceso controlado de cancelacion."
-        );
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void eliminar(Long id) throws Exception {
-        throw new Exception(
-            "No se permite eliminar ventas registradas "
-            + "porque se perderia el historial. "
-            + "Utilice el proceso de cancelacion."
-        );
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean cancelar(Long id) throws Exception {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException(
-                "El ID de venta debe ser mayor a cero."
-            );
-        }
-
         EntityManager em = conexion.getEntityManager();
         try {
             em.getTransaction().begin();
@@ -261,10 +134,6 @@ public class VentaDAO implements IVentaDAO {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            if (id == null) {
-                return null;
-            }
-
             return em.createQuery(
                 "SELECT DISTINCT v FROM Venta v " +
                 "JOIN FETCH v.usuario " +
@@ -284,10 +153,8 @@ public class VentaDAO implements IVentaDAO {
         }
     }
 
+    @Override
     public Venta buscarPorFolio(String folio) {
-        if (folio == null || folio.isBlank()) {
-            return null;
-        }
         EntityManager em = conexion.getEntityManager();
         try {
             return em.createQuery(
@@ -358,88 +225,4 @@ public class VentaDAO implements IVentaDAO {
 
 
 
-    // Validaciones basicas de la venta
-    private void validarVenta(Venta venta) {
-
-        if (venta == null) {
-            throw new IllegalArgumentException(
-                "La venta no puede ser nula."
-            );
-        }
-
-        if (venta.getId() != null) {
-            throw new IllegalArgumentException(
-                "Una venta nueva no debe tener ID."
-            );
-        }
-
-        if (venta.getFolio() == null ||
-            venta.getFolio().isBlank() ||
-            venta.getFolio().length() > 50) {
-            throw new IllegalArgumentException(
-                "El folio no es valido."
-            );
-        }
-
-        if (venta.getFechaHora() == null) {
-            throw new IllegalArgumentException(
-                "Debe indicar la fecha de la venta."
-            );
-        }
-
-        if (venta.getUsuario() == null ||
-            venta.getUsuario().getId() == null) {
-            throw new IllegalArgumentException(
-                "Debe seleccionar un usuario registrado."
-            );
-        }
-
-        if (!Float.isFinite(venta.getSubtotal()) ||
-            !Float.isFinite(venta.getIva()) ||
-            !Float.isFinite(venta.getTotal()) ||
-            venta.getSubtotal() < 0 ||
-            venta.getIva() < 0 ||
-            venta.getTotal() <= 0) {
-            throw new IllegalArgumentException(
-                "Los importes de la venta no son validos."
-            );
-        }
-
-        Pago pago = venta.getPago();
-        if (pago == null || pago.getId() != null ||
-            pago.getMetodoPago() == null || pago.getMonto() == null ||
-            !Float.isFinite(pago.getMonto()) || pago.getMonto() <= 0 ||
-            pago.getFechaHora() == null) {
-            throw new IllegalArgumentException("El pago de la venta no es válido.");
-        }
-
-        if (venta.getDetalles() == null ||
-            venta.getDetalles().isEmpty()) {
-            throw new IllegalArgumentException(
-                "La venta debe contener productos."
-            );
-        }
-
-        for (DetalleVenta detalle : venta.getDetalles()) {
-
-            if (detalle == null ||
-                detalle.getId() != null ||
-                detalle.getProducto() == null ||
-                detalle.getProducto().getId() == null) {
-                throw new IllegalArgumentException(
-                    "Uno de los detalles no es valido."
-                );
-            }
-
-            if (detalle.getCantidad() <= 0 ||
-                !Float.isFinite(detalle.getPrecioUnitario()) ||
-                !Float.isFinite(detalle.getSubtotal()) ||
-                detalle.getPrecioUnitario() < 0 ||
-                detalle.getSubtotal() < 0) {
-                throw new IllegalArgumentException(
-                    "Cantidad o importes del detalle invalidos."
-                );
-            }
-        }
-    }
 }

@@ -204,23 +204,26 @@ public class ProductoTallaDAOTest {
         );
    }
 
-   /** Confirma el bloqueo por stock positivo y elimina la talla al dejarlo en cero. */
+   /** Verifica que una excepción en la operación cancele la eliminación. */
    @Test
    @Order(5)
    public void testEliminar() throws Exception {
 
         assertNotNull(idPrueba);
 
-        // No debe permitir eliminar con existencias
+        // Simular un fallo antes de eliminar la talla bloqueada.
         Exception excepcion = assertThrows(
             Exception.class,
-            () -> productoTallaDAO.eliminar(idPrueba)
+            () -> productoTallaDAO.eliminar(idPrueba, talla -> {
+                assertNotNull(talla);
+                throw new IllegalStateException("Fallo simulado");
+            })
         );
 
         System.out.println("⚠️ [TEST ELIMINAR] Rechazo esperado: " + excepcion.getMessage());
         assertTrue(
-            excepcion.getMessage().contains("existencias"),
-            "Debe indicar que hay existencias."
+            excepcion.getMessage().contains("Fallo simulado"),
+            "Debe propagar el fallo de la operación."
         );
 
         // Dejar el stock en cero

@@ -6,9 +6,9 @@ package com.itson.negocios_gestorinventario;
 
 import bos.ProductoBO;
 import bos.ProductoTallaBO;
-import interfaces.IProductoDTO;
+import dtos.ProductoDTO;
+import dtos.ProductoTallaDTO;
 import interfaces.IProductoBO;
-import interfaces.IProductoTallaDTO;
 import interfaces.IProductoTallaBO;
 import java.util.List;
 
@@ -25,22 +25,22 @@ public class GestorInventario implements IGestorInventario {
     }
 
     @Override
-    public IProductoDTO buscarProductoPorCodigo(String codigo) {
+    public ProductoDTO buscarProductoPorCodigo(String codigo) {
         return this.productoBO.obtenerPorCodigoBarras(codigo);
     }
 
     @Override
-    public IProductoDTO obtenerProductoPorId(int id) {
+    public ProductoDTO obtenerProductoPorId(int id) {
         return this.productoBO.obtenerPorId((long) id);
     }
 
     @Override
-    public List<? extends IProductoDTO> listarProductosPorCategoria(int idCategoria) {
+    public List<ProductoDTO> listarProductosPorCategoria(int idCategoria) {
         return this.productoBO.listarProductosPorCategoria((long) idCategoria);
     }
 
     @Override
-    public List<? extends IProductoTallaDTO> obtenerTallasPorProducto(int idProducto) {
+    public List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto) {
         return this.productoTallaBO.obtenerTallasPorProducto(idProducto);
     }
 
@@ -59,11 +59,11 @@ public class GestorInventario implements IGestorInventario {
         return this.productoTallaBO.reabastecerStock(idProductoTalla, cantidad);
     }
     @Override
-    public List<? extends IProductoDTO> buscarProductos(String criterio) {
+    public List<ProductoDTO> buscarProductos(String criterio) {
         return productoBO.buscarProductos(criterio);
     }
     @Override
-    public List<? extends IProductoDTO> buscarProductosPorCategoria(String nombre) {
+    public List<ProductoDTO> buscarProductosPorCategoria(String nombre) {
         if (nombre == null || nombre.isBlank()) return List.of();
         for (dtos.CategoriaDTO categoria : bos.CategoriaBO.getInstance().obtenerTodas()) {
             if (nombre.trim().equalsIgnoreCase(categoria.getNombre())) {

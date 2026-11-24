@@ -17,4 +17,5 @@ public interface ICategoriaDAO {
     void eliminar(Long id) throws Exception;
     Categoria buscarCategoriaPorId(Long id);
     List<Categoria> obtenerTodas();
+    long contarProductos(Long id);
 }

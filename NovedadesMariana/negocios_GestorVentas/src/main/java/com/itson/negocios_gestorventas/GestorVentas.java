@@ -6,10 +6,8 @@ package com.itson.negocios_gestorventas;
 
 import bos.VentaBO;
 import dtos.DetalleVentaDTO;
+import dtos.ResumenVentaDTO;
 import dtos.VentaDTO;
-import interfaces.IDetalleVentaDTO;
-import interfaces.IResumenVentaDTO;
-import interfaces.IVentaDTO;
 import interfaces.IVentaBO;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +25,7 @@ public class GestorVentas implements IGestorVentas {
     }
 
     @Override
-    public IVentaDTO registrarVenta(IVentaDTO venta) {
+    public VentaDTO registrarVenta(VentaDTO venta) {
         if (venta == null) {
             return this.ventaBO.registrarVenta(null);
         }
@@ -39,12 +37,12 @@ public class GestorVentas implements IGestorVentas {
     }
 
     @Override
-    public IVentaDTO obtenerVentaPorId(int id) {
+    public VentaDTO obtenerVentaPorId(int id) {
         return this.ventaBO.obtenerPorId(id);
     }
 
     @Override
-    public IVentaDTO obtenerVentaPorFolio(String folio) {
+    public VentaDTO obtenerVentaPorFolio(String folio) {
         return this.ventaBO.obtenerPorFolio(folio);
     }
 
@@ -60,7 +58,7 @@ public class GestorVentas implements IGestorVentas {
             return this.ventaBO.calcularTotales(null, descuento);
         }
         List<DetalleVentaDTO> detallesAdaptados = new ArrayList<>();
-        for (IDetalleVentaDTO detalle : detalles) {
+        for (DetalleVentaDTO detalle : detalles) {
             detallesAdaptados.add(detalle == null ? null : new DetalleVentaDTO(
                     detalle.getId(), detalle.getIdVenta(), detalle.getIdProductoTalla(),
                     detalle.getNombreProducto(), detalle.getTalla(), detalle.getCantidad(),

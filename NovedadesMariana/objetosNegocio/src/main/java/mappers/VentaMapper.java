@@ -7,7 +7,7 @@ import dominio.Venta;
 import dtos.DetalleVentaDTO;
 import dtos.PagoDTO;
 import dtos.VentaDTO;
-import interfaces.IProductoTallaDAO;
+import java.util.function.LongFunction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
 public final class VentaMapper {
     private VentaMapper() { }
 
-    public static Venta toEntity(VentaDTO dto, IProductoTallaDAO productoTallaDAO) {
+    public static Venta toEntity(VentaDTO dto, LongFunction<ProductoTalla> obtenerTalla) {
         if (dto == null) return null;
         Venta venta = new Venta();
         if (dto.getId() > 0) venta.setId((long) dto.getId());
@@ -32,10 +32,7 @@ public final class VentaMapper {
         }
         if (dto.getDetalles() != null) {
             for (DetalleVentaDTO detalleDTO : dto.getDetalles()) {
-                ProductoTalla talla = productoTallaDAO.buscarProductoTallaPorId((long) detalleDTO.getIdProductoTalla());
-                if (talla == null || talla.getProducto() == null) {
-                    throw new IllegalArgumentException("No existe la talla de producto " + detalleDTO.getIdProductoTalla());
-                }
+                ProductoTalla talla = obtenerTalla.apply(detalleDTO.getIdProductoTalla());
                 DetalleVenta detalle = new DetalleVenta(detalleDTO.getCantidad(), detalleDTO.getPrecioUnitario(),
                         detalleDTO.getSubtotal(), talla.getProducto());
                 venta.agregarDetalle(detalle);

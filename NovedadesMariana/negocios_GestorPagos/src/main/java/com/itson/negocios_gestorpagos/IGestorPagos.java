@@ -4,7 +4,7 @@
  */
 package com.itson.negocios_gestorpagos;
 
-import interfaces.IPagoDTO;
+import dtos.PagoDTO;
 import java.util.List;
 
 /**
@@ -12,9 +12,9 @@ import java.util.List;
  * @author saula
  */
 public interface IGestorPagos {
-    IPagoDTO registrarPago(IPagoDTO pago);
+    PagoDTO registrarPago(PagoDTO pago);
 
     float calcularCambio(float totalVenta, float montoRecibido);
 
-    List<? extends IPagoDTO> obtenerPagosPorVenta(int idVenta);
+    List<PagoDTO> obtenerPagosPorVenta(int idVenta);
 }

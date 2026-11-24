@@ -13,9 +13,8 @@ import conexion.ConexionJPA;
 import interfaces.IVentaDAO;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -187,15 +186,14 @@ public class VentaDAOTest {
         venta.agregarDetalle(detalleM);
         venta.agregarDetalle(detalleS);
 
-        // Asociar cada detalle con su talla
-        Map<DetalleVenta, Long> tallas = new HashMap<>();
-
-        tallas.put(detalleM, idTallaM);
-        tallas.put(detalleS, idTallaS);
-
         // Registrar venta y descontar inventario
         implementacion.guardarConTallas(
-            venta, tallas
+            venta, Set.of(idTallaM, idTallaS), tallas -> {
+                ProductoTalla tallaM = tallas.get(idTallaM);
+                ProductoTalla tallaS = tallas.get(idTallaS);
+                tallaM.setStockActual(tallaM.getStockActual() - detalleM.getCantidad());
+                tallaS.setStockActual(tallaS.getStockActual() - detalleS.getCantidad());
+            }
         );
 
         // 🔴 BREAKPOINT 1: Revisar IDs generados y stock después del registro.
@@ -358,7 +356,7 @@ public class VentaDAOTest {
    /** Valida que una venta sin stock suficiente falle sin alterar el inventario. */
    @Test
    @Order(5)
-   public void testStockInsuficiente() throws Exception {
+   public void testRevierteInventarioSiFallaLaOperacion() throws Exception {
 
         // CORREGIDO: buscarProductoTallaPorId
         int stockAnterior = productoTallaDAO
@@ -395,14 +393,15 @@ public class VentaDAOTest {
 
         venta.agregarDetalle(detalle);
 
-        Map<DetalleVenta, Long> tallas = new HashMap<>();
-        tallas.put(detalle, idTallaM);
-
-        // Debe rechazar la venta
+        // Simular un fallo después de modificar la talla bloqueada.
         assertThrows(
             Exception.class,
             () -> implementacion.guardarConTallas(
-                venta, tallas
+                venta, Set.of(idTallaM), tallas -> {
+                    ProductoTalla talla = tallas.get(idTallaM);
+                    talla.setStockActual(talla.getStockActual() - 1);
+                    throw new IllegalStateException("Fallo simulado");
+                }
             )
         );
 
@@ -412,7 +411,7 @@ public class VentaDAOTest {
             productoTallaDAO.buscarProductoTallaPorId(idTallaM);
 
         assertNotNull(tallaActual);
-        System.out.println("⚠️ [TEST STOCK INSUFICIENTE] Stock conservado: "
+        System.out.println("[TEST REVERSIÓN] Stock conservado: "
                 + tallaActual.getStockActual() + " (anterior: " + stockAnterior + ")");
         assertEquals(
             stockAnterior,
