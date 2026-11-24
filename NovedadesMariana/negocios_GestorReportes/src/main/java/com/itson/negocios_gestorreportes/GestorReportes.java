@@ -7,7 +7,6 @@ import dtos.VentaDTO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.Normalizer;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,35 +43,30 @@ public class GestorReportes implements IGestorReportes {
     }
 
     @Override
+    public List<VentaDTO> obtenerVentasDelPeriodo(PeriodoReporte periodo, LocalDate fechaReferencia) {
+        validar(periodo, fechaReferencia);
+        List<VentaDTO> ventas = gestorVentas.obtenerVentasEntre(
+                periodo.inicio(fechaReferencia).atStartOfDay(),
+                periodo.fin(fechaReferencia).atStartOfDay());
+        return ventas == null ? List.of() : ventas;
+    }
+
+    @Override
     public byte[] generarReportePdf(PeriodoReporte periodo, LocalDate fechaReferencia) {
+        List<VentaDTO> ventas = obtenerVentasDelPeriodo(periodo, fechaReferencia);
+        return crearPdf(periodo, periodo.inicio(fechaReferencia), periodo.fin(fechaReferencia), ventas);
+    }
+
+    private void validar(PeriodoReporte periodo, LocalDate fechaReferencia) {
         if (periodo == null) {
             throw new IllegalArgumentException("Debe seleccionar día, semana o mes para el reporte.");
         }
         if (fechaReferencia == null) {
             throw new IllegalArgumentException("Debe indicar la fecha de referencia del reporte.");
         }
-
-        LocalDate inicio;
-        LocalDate fin;
-        switch (periodo) {
-            case DIA -> {
-                inicio = fechaReferencia;
-                fin = inicio.plusDays(1);
-            }
-            case SEMANA -> {
-                inicio = fechaReferencia.with(DayOfWeek.MONDAY);
-                fin = inicio.plusWeeks(1);
-            }
-            case MES -> {
-                inicio = fechaReferencia.withDayOfMonth(1);
-                fin = inicio.plusMonths(1);
-            }
-            default -> throw new IllegalArgumentException("El periodo de reporte no es válido.");
+        if (fechaReferencia.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha del reporte no puede ser posterior a hoy.");
         }
-
-        List<VentaDTO> ventas = gestorVentas.obtenerVentasEntre(
-                inicio.atStartOfDay(), fin.atStartOfDay());
-        return crearPdf(periodo, inicio, fin, ventas);
     }
 
     private byte[] crearPdf(PeriodoReporte periodo, LocalDate inicio,

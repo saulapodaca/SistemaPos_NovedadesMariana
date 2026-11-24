@@ -101,6 +101,29 @@ class GestorReportesTest {
                 () -> gestor.generarReportePdf(PeriodoReporte.DIA, null));
     }
 
+    @Test
+    void rechazaFechaFutura() {
+        GestorReportes gestor = new GestorReportes(new GestorVentasFalso(List.of()));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> gestor.obtenerVentasDelPeriodo(PeriodoReporte.DIA, LocalDate.now().plusDays(1)));
+    }
+
+    @Test
+    void consultaVentasDelPeriodoSinGenerarPdf() {
+        VentaDTO venta = venta("VEN-00007", "Short", 200.0f, 32.0f, 232.0f);
+        GestorVentasFalso ventas = new GestorVentasFalso(List.of(venta));
+        GestorReportes gestor = new GestorReportes(ventas);
+
+        List<VentaDTO> resultado = gestor.obtenerVentasDelPeriodo(
+                PeriodoReporte.SEMANA, LocalDate.of(2026, 11, 22));
+
+        assertEquals(1, resultado.size());
+        assertEquals("VEN-00007", resultado.get(0).getFolio());
+        assertEquals(LocalDate.of(2026, 11, 16).atStartOfDay(), ventas.inicio);
+        assertEquals(LocalDate.of(2026, 11, 23).atStartOfDay(), ventas.fin);
+    }
+
     private static VentaDTO venta(String folio, String producto, float subtotal, float iva, float total) {
         LocalDateTime fechaHora = LocalDateTime.of(2026, 11, 18, 10, 30);
         DetalleVentaDTO detalle = new DetalleVentaDTO(
