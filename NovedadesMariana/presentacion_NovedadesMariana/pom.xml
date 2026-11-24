@@ -16,6 +16,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>negocios_GestorReportes</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>persistencia</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
