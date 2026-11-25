@@ -4,6 +4,7 @@
  */
 package interfaces;
 
+import dtos.CategoriaDTO;
 import dtos.ProductoDTO;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * @author saula
  */
 public interface IProductoBO {
-    public void guardar(ProductoDTO producto) throws Exception;
+    public ProductoDTO guardar(ProductoDTO producto) throws Exception;
     public void actualizar(ProductoDTO producto) throws Exception;
     public void eliminar(Long id) throws Exception;
     public List<ProductoDTO> obtenerTodos();
@@ -21,4 +22,5 @@ public interface IProductoBO {
     ProductoDTO obtenerPorCodigoBarras(String codigoBarras);
     List<ProductoDTO> listarProductosPorCategoria(Long idCategoria);
     List<ProductoDTO> buscarProductos(String criterio);
+    List<CategoriaDTO> obtenerCategoriaDTOs();
 }

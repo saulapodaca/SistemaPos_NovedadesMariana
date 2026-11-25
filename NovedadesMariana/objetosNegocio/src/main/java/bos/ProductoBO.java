@@ -4,19 +4,20 @@
  */
 package bos;
 
-import java.util.ArrayList;
-
-import dominio.Producto;
-
-import dtos.ProductoDTO;
-import interfaces.IProductoBO;
 import daos.CategoriaDAO;
 import daos.ProductoDAO;
+import dominio.Categoria;
+import dominio.Producto;
+import dtos.CategoriaDTO;
+import dtos.ProductoDTO;
 import interfaces.ICategoriaDAO;
+import interfaces.IProductoBO;
 import interfaces.IProductoDAO;
-import mappers.ProductoMapper;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import mappers.CategoriaMapper;
+import mappers.ProductoMapper;
 
 /**
  *
@@ -45,7 +46,7 @@ public class ProductoBO implements IProductoBO {
     }
 
     @Override
-    public void guardar(ProductoDTO productoDTO) throws Exception {
+    public ProductoDTO guardar(ProductoDTO productoDTO) throws Exception {
         validarProducto(productoDTO);
         if (productoDTO.getId() != null) {
             throw new IllegalArgumentException("Un nuevo producto no debe tener un ID asignado.");
@@ -61,6 +62,7 @@ public class ProductoBO implements IProductoBO {
         }
         validarCategoriasExistentes(productoDTO.getCategoriasIds());
         productoDAO.guardar(ProductoMapper.toEntity(productoDTO));
+        return productoDTO;
     }
 
     @Override
@@ -122,7 +124,7 @@ public class ProductoBO implements IProductoBO {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("El ID del producto debe ser un número entero positivo.");
         }
-        
+
         return ProductoMapper.toDTO(productoDAO.buscarProductoPorId(id));
     }
 
@@ -131,7 +133,7 @@ public class ProductoBO implements IProductoBO {
         if (sku == null || sku.isBlank()) {
             throw new IllegalArgumentException("El SKU no puede ser nulo ni estar vacío.");
         }
-        
+
         return ProductoMapper.toDTO(productoDAO.buscarPorSku(sku.trim()));
     }
 
@@ -206,7 +208,8 @@ public class ProductoBO implements IProductoBO {
     }
 
     /**
-     * Consulta y verifica que los IDs recibidos correspondan a categorías existentes en BD.
+     * Consulta y verifica que los IDs recibidos correspondan a categorías
+     * existentes en BD.
      */
     private void validarCategoriasExistentes(java.util.Set<Long> categoriasIds) {
         for (Long idCat : categoriasIds) {
@@ -225,5 +228,24 @@ public class ProductoBO implements IProductoBO {
             }
         }
         return resultado;
+    }
+    
+    private List<CategoriaDTO> convertirListaCategoriasADTO(List<Categoria> entidades) {
+        List<CategoriaDTO> resultado = new ArrayList<>();
+        if (entidades != null) {
+            for (Categoria entidad : entidades) {
+                resultado.add(CategoriaMapper.toDTO(entidad));
+            }
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<CategoriaDTO> obtenerCategoriaDTOs() {
+        List<CategoriaDTO> categorias = convertirListaCategoriasADTO(categoriaDAO.obtenerTodas());
+        if (categorias == null || categorias.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return categorias;
     }
 }

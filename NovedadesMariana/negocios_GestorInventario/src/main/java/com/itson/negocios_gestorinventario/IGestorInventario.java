@@ -4,6 +4,7 @@
  */
 package com.itson.negocios_gestorinventario;
 
+import dtos.CategoriaDTO;
 import dtos.ProductoDTO;
 import dtos.ProductoTallaDTO;
 import java.util.List;
@@ -34,4 +35,12 @@ public interface IGestorInventario {
     List<ProductoDTO> buscarProductos(String criterio);
     
     List<ProductoDTO> buscarProductosPorCategoria(String nombre);
+
+    public ProductoDTO registrarProducto(ProductoDTO normalizado);
+
+    public List<CategoriaDTO> obtenerCategorias();
+
+    public boolean existeCodigoBarras(String trim);
+
+    public boolean existeSku(String toUpperCase);
 }

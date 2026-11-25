@@ -4,6 +4,9 @@
  */
 package com.itson.negocios_gestorinventario;
 
+import bos.ProductoBO;
+import bos.ProductoTallaBO;
+import dtos.CategoriaDTO;
 import dtos.ProductoDTO;
 import dtos.ProductoTallaDTO;
 import interfaces.IProductoBO;
@@ -16,8 +19,8 @@ import java.util.List;
  */
 public class GestorInventario implements IGestorInventario {
 
-    private final IProductoBO productoBO =  ProductoBO.getInstance();
-    private final IProductoTallaBO productoTallaBO =  ProductoTallaBO.getInstance();
+    private final IProductoBO productoBO = ProductoBO.getInstance();
+    private final IProductoTallaBO productoTallaBO = ProductoTallaBO.getInstance();
 
     public GestorInventario() {
     }
@@ -56,13 +59,17 @@ public class GestorInventario implements IGestorInventario {
     public boolean reabastecerStock(int idProductoTalla, int cantidad) {
         return this.productoTallaBO.reabastecerStock(idProductoTalla, cantidad);
     }
+
     @Override
     public List<ProductoDTO> buscarProductos(String criterio) {
         return productoBO.buscarProductos(criterio);
     }
+
     @Override
     public List<ProductoDTO> buscarProductosPorCategoria(String nombre) {
-        if (nombre == null || nombre.isBlank()) return List.of();
+        if (nombre == null || nombre.isBlank()) {
+            return List.of();
+        }
         for (dtos.CategoriaDTO categoria : bos.CategoriaBO.getInstance().obtenerTodas()) {
             if (nombre.trim().equalsIgnoreCase(categoria.getNombre())) {
                 return productoBO.listarProductosPorCategoria(categoria.getId());
@@ -73,11 +80,36 @@ public class GestorInventario implements IGestorInventario {
 
     @Override
     public ProductoDTO agregarProducto(ProductoDTO producto) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        try {
+            return this.productoBO.guardar(producto);
+        } catch (Exception ex) {
+            System.getLogger(GestorInventario.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        return null;
     }
 
     @Override
     public ProductoDTO buscarProductoPorSKU(String sku) {
+        return this.productoBO.obtenerPorSku(sku);
+    }
+
+    @Override
+    public ProductoDTO registrarProducto(ProductoDTO normalizado) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public List<CategoriaDTO> obtenerCategorias() {
+        return productoBO.obtenerCategoriaDTOs();
+    }
+
+    @Override
+    public boolean existeCodigoBarras(String trim) {
+        return productoBO.obtenerPorCodigoBarras(trim) != null;
+    }
+
+    @Override
+    public boolean existeSku(String toUpperCase) {
+        return productoBO.obtenerPorSku(toUpperCase) != null;
     }
 }

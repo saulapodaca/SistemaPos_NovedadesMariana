@@ -1,29 +1,32 @@
 package controles;
 
-import vistas.*;
-import utilerias.EjecutorTareas;
 import java.awt.*;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import javax.swing.*;
+import utilerias.EjecutorTareas;
+import vistas.*;
 
 /** Cambia pantallas y administra los diálogos de la venta. */
 public final class ControlNavegacion {
     private static ControlNavegacion instance;
     private final FormPrincipal formPrincipal;
     private final ControlRealizarVenta control;
+    private final ControlAgregarProducto controlProducto;
     private PanelVenta panelVenta;
     private JDialog modal;
     private final EjecutorTareas tareas = new EjecutorTareas();
 
-    public ControlNavegacion(FormPrincipal formPrincipal, ControlRealizarVenta control) {
+    public ControlNavegacion(FormPrincipal formPrincipal, ControlRealizarVenta control, ControlAgregarProducto controlProducto) {
         this.formPrincipal = formPrincipal;
         this.control = control;
+        this.controlProducto = controlProducto;
+        this.formPrincipal.setAccionAgregarProducto(this::abrirModalRegistrarProducto);
     }
 
     public static synchronized ControlNavegacion getInstance() {
         if (instance == null) {
-            instance = new ControlNavegacion(new FormPrincipal(), ControlRealizarVenta.getInstance());
+            instance = new ControlNavegacion(new FormPrincipal(), ControlRealizarVenta.getInstance(), ControlAgregarProducto.getInstance());
         }
         return instance;
     }
@@ -55,6 +58,23 @@ public final class ControlNavegacion {
             return;
         }
         mostrarModal("Procesar cobro", new PanelModalCobro(control, this), 760, 680);
+    }
+
+    public void abrirModalRegistrarProducto() {
+        if (tareas.estaOcupado()) return;
+        PanelRegistrarProducto panelRegistro = new PanelRegistrarProducto(this, productoDTO -> {
+            ejecutar(() -> {
+                // Reemplaza por el método correspondiente de tu controlador o fachada
+                return controlProducto.registrarProducto(productoDTO);
+            }, registrado -> {
+                cerrarModal();
+                if (panelVenta != null) {
+                    panelVenta.refrescar();
+                }
+                informar("Producto registrado correctamente.");
+            });
+        });
+        mostrarModal("Registrar producto", panelRegistro, 780, 660);
     }
 
     private void identificarEmpleado() {
@@ -130,6 +150,7 @@ public final class ControlNavegacion {
     public <T> void ejecutar(Callable<T> tarea, Consumer<T> completado) {
         tareas.ejecutar(modal == null ? formPrincipal : modal, tarea, completado, this::error);
     }
+
     public void error(Throwable error) {
         String mensaje = error.getMessage();
         JOptionPane.showMessageDialog(modal == null ? formPrincipal : modal,
