@@ -18,4 +18,5 @@ public interface IUsuarioDAO {
     Usuario buscarPorId(Long id);
     List<Usuario> obtenerTodos();
     Usuario buscarPorUsuario(String nombreUsuario);
+    long contarVentas(Long id);
 }

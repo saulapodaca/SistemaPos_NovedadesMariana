@@ -4,13 +4,11 @@
  */
 package dtos;
 
-import interfaces.IResumenVentaDTO;
-
 /**
  *
  * @author saula
  */
-public class ResumenVentaDTO implements IResumenVentaDTO {
+public class ResumenVentaDTO {
     private float subtotal;
     private float iva;
     private float descuento;

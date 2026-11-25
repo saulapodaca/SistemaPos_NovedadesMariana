@@ -109,4 +109,12 @@ class ProductoTallaBOTest {
         assertThrows(IllegalArgumentException.class,
                 () -> productoTallaBO.reabastecerStock(idTalla.intValue(), -1));
     }
+
+    @Test
+    void eliminaUnaTallaCuandoSeAgotanSusExistencias() throws Exception {
+        assertThrows(IllegalStateException.class, () -> productoTallaBO.eliminar(idTalla));
+        assertTrue(productoTallaBO.descontarStock(idTalla.intValue(), 8));
+        productoTallaBO.eliminar(idTalla);
+        assertTrue(productoTallaBO.obtenerTallasPorProducto(idProducto.intValue()).isEmpty());
+    }
 }

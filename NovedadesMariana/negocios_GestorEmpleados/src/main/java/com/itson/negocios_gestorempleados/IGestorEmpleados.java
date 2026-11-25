@@ -4,16 +4,26 @@
  */
 package com.itson.negocios_gestorempleados;
 
-import interfaces.IUsuarioDTO;
+import dtos.UsuarioDTO;
+import java.util.List;
+
 
 /**
  *
  * @author saula
  */
 public interface IGestorEmpleados {
-    IUsuarioDTO autenticar(String usuario, String contrasenia);
+    UsuarioDTO autenticar(String usuario, String contrasenia);
 
-    IUsuarioDTO obtenerPorId(int id);
+    UsuarioDTO obtenerPorId(int id);
 
-    IUsuarioDTO obtenerPorUsuario(String usuario);
+    UsuarioDTO obtenerPorUsuario(String usuario);
+
+    List<UsuarioDTO> listarEmpleados() throws Exception;
+
+    void agregarEmpleado(UsuarioDTO usuario) throws Exception;
+
+    void modificarEmpleado(UsuarioDTO usuario) throws Exception;
+
+    void eliminarEmpleado(Long id) throws Exception;
 }

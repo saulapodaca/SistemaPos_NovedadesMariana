@@ -14,11 +14,11 @@ public interface IGestorInventario {
 
     IProductoDTO buscarProductoPorCodigo(String codigo);
 
-    IProductoDTO obtenerProductoPorId(int id);
+    ProductoDTO obtenerProductoPorId(int id);
 
-    List<? extends IProductoDTO> listarProductosPorCategoria(int idCategoria);
+    List<ProductoDTO> listarProductosPorCategoria(int idCategoria);
 
-    List<? extends IProductoTallaDTO> obtenerTallasPorProducto(int idProducto);
+    List<ProductoTallaDTO> obtenerTallasPorProducto(int idProducto);
 
     boolean validarStockDisponible(int idProductoTalla, int cantidad);
 

@@ -1,6 +1,7 @@
 package bos;
 
 import dtos.PagoDTO;
+import dominio.Pago;
 import interfaces.IPagoBO;
 import daos.PagoDAO;
 import interfaces.IPagoDAO;
@@ -89,6 +90,48 @@ public class PagoBO implements IPagoBO {
         if (pago != null) pago.setIdVenta(idVenta);
         return pago == null ? List.of()
                 : List.of(pago);
+    }
+
+
+    public void guardar(Pago pago) throws Exception {
+        validarPagoPersistible(pago);
+        pagoDAO.guardar(pago);
+    }
+
+    public void actualizar(Pago pago) throws Exception {
+        validarPagoPersistible(pago);
+        validarPagoIndependiente(pago.getId());
+        pagoDAO.actualizar(pago);
+    }
+
+    public void eliminar(Long id) throws Exception {
+        validarPagoIndependiente(id);
+        pagoDAO.eliminar(id);
+    }
+
+    private void validarPagoIndependiente(Long id) {
+        if (id == null || id <= 0 || pagoDAO.buscarPorId(id) == null) {
+            throw new IllegalArgumentException("El pago no existe.");
+        }
+        if (pagoDAO.contarVentas(id) > 0) {
+            throw new IllegalStateException("El pago está asociado a una venta registrada.");
+        }
+    }
+
+    static void validarPagoPersistible(Pago pago) {
+        if (pago == null || pago.getMetodoPago() == null || pago.getFechaHora() == null) {
+            throw new IllegalArgumentException("Debe indicar el pago, su método y la fecha.");
+        }
+        if (pago.getMonto() == null || !Float.isFinite(pago.getMonto()) || pago.getMonto() <= 0) {
+            throw new IllegalArgumentException("El monto debe ser válido y mayor a cero.");
+        }
+        if (importeOpcionalInvalido(pago.getMontoRecibido()) || importeOpcionalInvalido(pago.getCambio())) {
+            throw new IllegalArgumentException("El monto recibido y el cambio deben ser válidos y no negativos.");
+        }
+    }
+
+    private static boolean importeOpcionalInvalido(Float importe) {
+        return importe != null && (!Float.isFinite(importe) || importe < 0);
     }
 
     private static void validarPago(PagoDTO pago, boolean requiereVenta) {

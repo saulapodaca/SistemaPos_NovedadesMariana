@@ -10,6 +10,7 @@ import daos.ProductoTallaDAO;
 import interfaces.IProductoTallaDAO;
 import mappers.ProductoTallaMapper;
 import java.util.List;
+import java.util.function.Consumer;
 
 /** Reglas de inventario respaldadas por la persistencia de tallas. */
 public class ProductoTallaBO implements IProductoTallaBO {
@@ -47,27 +48,19 @@ public class ProductoTallaBO implements IProductoTallaBO {
     @Override
     public synchronized boolean descontarStock(int idProductoTalla, int cantidad) {
         validarEntrada(idProductoTalla, cantidad);
-        ProductoTallaDTO talla = buscarTalla(idProductoTalla);
-        if (talla.getStockActual() < cantidad) {
-            throw new IllegalStateException("Stock insuficiente para la talla "
-                    + talla.getTalla() + ". Disponible: " + talla.getStockActual()
-                    + ", solicitado: " + cantidad + ".");
-        }
-        talla.setStockActual(talla.getStockActual() - cantidad);
-        actualizar(talla);
+        modificarStock(idProductoTalla, talla -> descontarStock(talla, cantidad));
         return true;
     }
 
     @Override
     public synchronized boolean reabastecerStock(int idProductoTalla, int cantidad) {
         validarEntrada(idProductoTalla, cantidad);
-        ProductoTallaDTO talla = buscarTalla(idProductoTalla);
-        if (talla.getStockActual() > Integer.MAX_VALUE - cantidad) {
-            throw new IllegalArgumentException(
-                    "El reabastecimiento excede el stock máximo permitido.");
-        }
-        talla.setStockActual(talla.getStockActual() + cantidad);
-        actualizar(talla);
+        modificarStock(idProductoTalla, talla -> {
+            if (talla.getStockActual() > Integer.MAX_VALUE - cantidad) {
+                throw new IllegalArgumentException("El reabastecimiento excede el stock máximo permitido.");
+            }
+            talla.setStockActual(talla.getStockActual() + cantidad);
+        });
         return true;
     }
 
@@ -127,9 +120,81 @@ public class ProductoTallaBO implements IProductoTallaBO {
         return talla;
     }
 
-    private void actualizar(ProductoTallaDTO talla) {
+    public void guardar(ProductoTalla talla) throws Exception {
+        validarTalla(talla);
+        if (talla.getId() != null) {
+            throw new IllegalArgumentException("Una talla nueva no debe tener ID.");
+        }
+        if (talla.getProducto() == null || talla.getProducto().getId() == null
+                || ProductoBO.getInstance().obtenerPorId(talla.getProducto().getId()) == null) {
+            throw new IllegalArgumentException("Debe seleccionar un producto registrado.");
+        }
+        productoTallaDAO.guardar(talla);
+    }
+
+    public void actualizar(ProductoTalla talla) throws Exception {
+        validarTalla(talla);
+        validarId(talla.getId());
+        productoTallaDAO.modificar(talla.getId(), existente -> {
+            validarExistencia(existente);
+            if (talla.getProducto() != null
+                    && !existente.getProducto().getId().equals(talla.getProducto().getId())) {
+                throw new IllegalArgumentException("No se puede cambiar el producto asociado.");
+            }
+            existente.setTalla(talla.getTalla());
+            existente.setStockActual(talla.getStockActual());
+        });
+    }
+
+    public void eliminar(Long id) throws Exception {
+        validarId(id);
+        productoTallaDAO.eliminar(id, talla -> {
+            validarExistencia(talla);
+            if (talla.getStockActual() > 0) {
+                throw new IllegalStateException("No se puede eliminar una talla que tiene existencias disponibles.");
+            }
+        });
+    }
+
+    private static void validarTalla(ProductoTalla talla) {
+        if (talla == null || talla.getTalla() == null || talla.getTalla().isBlank()
+                || talla.getTalla().length() > 30) {
+            throw new IllegalArgumentException("La talla debe contener entre 1 y 30 caracteres.");
+        }
+        if (talla.getStockActual() == null || talla.getStockActual() < 0) {
+            throw new IllegalArgumentException("El stock no puede ser nulo ni negativo.");
+        }
+    }
+
+    private static void validarId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("Debe indicar un ID de talla válido.");
+        }
+    }
+
+    private static void validarExistencia(ProductoTalla talla) {
+        if (talla == null) {
+            throw new IllegalArgumentException("La talla no existe.");
+        }
+    }
+
+    static void descontarStock(ProductoTalla talla, int cantidad) {
+        if (talla.getStockActual() < cantidad) {
+            throw new IllegalStateException("Stock insuficiente para la talla "
+                    + talla.getTalla() + ". Disponible: " + talla.getStockActual()
+                    + ", solicitado: " + cantidad + ".");
+        }
+        talla.setStockActual(talla.getStockActual() - cantidad);
+    }
+
+    private void modificarStock(long id, Consumer<ProductoTalla> cambios) {
         try {
-            productoTallaDAO.actualizar(ProductoTallaMapper.toEntity(talla));
+            productoTallaDAO.modificar(id, talla -> {
+                validarExistencia(talla);
+                cambios.accept(talla);
+            });
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalStateException("No se pudo actualizar el inventario.", e);
         }

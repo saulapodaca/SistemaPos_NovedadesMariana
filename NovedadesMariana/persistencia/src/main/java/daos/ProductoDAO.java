@@ -4,12 +4,10 @@ package daos;
 import dominio.Categoria;
 import dominio.Producto;
 import dominio.ProductoTalla;
-import dtos.ProductoDTO;
 import conexion.ConexionJPA;
 import interfaces.IProductoDAO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,14 +21,6 @@ public class ProductoDAO implements IProductoDAO{
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarProducto(producto);
-
-            if (producto.getId() != null) {
-                throw new Exception(
-                    "Un producto nuevo no debe tener ID."
-                );
-            }
-
             em.getTransaction().begin();
 
             // Asociar categorias existentes
@@ -41,29 +31,8 @@ public class ProductoDAO implements IProductoDAO{
             producto.getCategorias().clear();
             producto.getCategorias().addAll(categorias);
 
-            // Validar y asociar tallas
+            // Asociar tallas
             for (ProductoTalla talla : producto.getTallas()) {
-
-                if (talla == null ||
-                    talla.getTalla() == null ||
-                    talla.getTalla().isBlank()) {
-                    throw new Exception(
-                        "La talla no es valida."
-                    );
-                }
-
-                if (talla.getStockActual() == null ||
-                    talla.getStockActual() < 0) {
-                    throw new Exception(
-                        "El stock no puede ser negativo."
-                    );
-                }
-
-                if (talla.getId() != null) {
-                    throw new Exception(
-                        "Una talla nueva no debe tener ID."
-                    );
-                }
 
                 talla.setProducto(producto);
             }
@@ -92,25 +61,11 @@ public class ProductoDAO implements IProductoDAO{
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarProducto(producto);
-
-            if (producto.getId() == null) {
-                throw new Exception(
-                    "El producto debe tener un ID."
-                );
-            }
-
             em.getTransaction().begin();
 
             Producto existente = em.find(
                 Producto.class, producto.getId()
             );
-
-            if (existente == null) {
-                throw new Exception(
-                    "El producto no existe."
-                );
-            }
 
             // Actualizar datos generales
             existente.setSku(producto.getSku());
@@ -153,39 +108,11 @@ public class ProductoDAO implements IProductoDAO{
         EntityManager em = conexion.getEntityManager();
 
         try {
-            if (id == null) {
-                throw new Exception(
-                    "Debe indicar el ID del producto."
-                );
-            }
-
             em.getTransaction().begin();
 
             Producto producto = em.find(
                 Producto.class, id
             );
-
-            if (producto == null) {
-                throw new Exception(
-                    "El producto no existe."
-                );
-            }
-
-            // Comprobar si tiene ventas registradas
-            Long cantidadDetalles = em.createQuery(
-                "SELECT COUNT(d) FROM DetalleVenta d " +
-                "WHERE d.producto.id = :id",
-                Long.class
-            )
-            .setParameter("id", id)
-            .getSingleResult();
-
-            if (cantidadDetalles > 0) {
-                throw new Exception(
-                    "No se puede eliminar el producto " +
-                    "porque tiene ventas registradas."
-                );
-            }
 
             // Eliminar asociaciones con categorias
             producto.getCategorias().clear();
@@ -259,7 +186,7 @@ public class ProductoDAO implements IProductoDAO{
     // Recuperar categorias existentes
     private Set<Categoria> cargarCategorias(
             EntityManager em,
-            Set<Categoria> categorias) throws Exception {
+            Set<Categoria> categorias) {
 
         Set<Categoria> resultado = new HashSet<>();
 
@@ -269,23 +196,9 @@ public class ProductoDAO implements IProductoDAO{
 
         for (Categoria categoria : categorias) {
 
-            if (categoria == null ||
-                categoria.getId() == null) {
-                throw new Exception(
-                    "La categoria debe estar registrada."
-                );
-            }
-
-            Categoria existente = em.find(
+            Categoria existente = em.getReference(
                 Categoria.class, categoria.getId()
             );
-
-            if (existente == null) {
-                throw new Exception(
-                    "No existe la categoria con ID: "
-                    + categoria.getId()
-                );
-            }
 
             resultado.add(existente);
         }
@@ -293,56 +206,9 @@ public class ProductoDAO implements IProductoDAO{
         return resultado;
     }
 
-    // Validaciones basicas del producto
-    private void validarProducto(Producto producto) {
-
-        if (producto == null) {
-            throw new IllegalArgumentException(
-                "El producto no puede ser nulo."
-            );
-        }
-
-        if (producto.getSku() == null ||
-            producto.getSku().isBlank()) {
-            throw new IllegalArgumentException(
-                "El SKU es obligatorio."
-            );
-        }
-
-        if (producto.getNombre() == null ||
-            producto.getNombre().isBlank()) {
-            throw new IllegalArgumentException(
-                "El nombre es obligatorio."
-            );
-        }
-
-        if (producto.getDescripcion() == null) {
-            throw new IllegalArgumentException(
-                "La descripcion es obligatoria."
-            );
-        }
-
-        if (producto.getPrecio() == null ||
-            !Float.isFinite(producto.getPrecio()) ||
-            producto.getPrecio() < 0) {
-            throw new IllegalArgumentException(
-                "El precio no es valido."
-            );
-        }
-
-        if (producto.getTipoPrenda() == null) {
-            throw new IllegalArgumentException(
-                "Debe seleccionar un tipo de prenda."
-            );
-        }
-    }
     
     @Override
     public Producto buscarPorSku(String sku) {
-        if (sku == null || sku.isBlank()) {
-            return null;
-        }
-
         EntityManager em = conexion.getEntityManager();
         try {
             Producto producto = em.createQuery(
@@ -369,10 +235,6 @@ public class ProductoDAO implements IProductoDAO{
 
     @Override
     public Producto buscarPorCodigoBarras(String codigoBarras) {
-        if (codigoBarras == null || codigoBarras.isBlank()) {
-            return null;
-        }
-
         EntityManager em = conexion.getEntityManager();
         try {
             return em.createQuery(
@@ -392,10 +254,6 @@ public class ProductoDAO implements IProductoDAO{
 
     @Override
     public List<Producto> listarProductosPorCategoria(Long idCategoria) {
-        if (idCategoria == null || idCategoria <= 0) {
-            return Collections.emptyList();
-        }
-
         EntityManager em = conexion.getEntityManager();
         try {
             List<Producto> productos = em.createQuery(
@@ -422,10 +280,6 @@ public class ProductoDAO implements IProductoDAO{
 
     @Override
     public List<Producto> buscarProductos(String criterio) {
-        if (criterio == null || criterio.isBlank()) {
-            return Collections.emptyList();
-        }
-
         EntityManager em = conexion.getEntityManager();
         try {
             String patron = "%" + criterio.trim().toLowerCase() + "%";
@@ -453,4 +307,19 @@ public class ProductoDAO implements IProductoDAO{
         }
     }
 
+    @Override
+    public long contarDetallesVenta(Long id) {
+        EntityManager em = conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT COUNT(d) FROM DetalleVenta d " +
+                    "WHERE d.producto.id = :id",
+                    Long.class
+                )
+                .setParameter("id", id)
+                .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
 }

@@ -11,7 +11,6 @@ import com.itson.negocios_gestorventas.IGestorVentas;
 import dtos.DatosFiscalesDTO;
 import dtos.DetalleVentaDTO;
 import dtos.VentaDTO;
-import interfaces.IVentaDTO;
 
 /**
  *
@@ -77,7 +76,7 @@ public class RealizarVenta implements IRealizarVenta {
         return false;
     }
 
-    private VentaDTO adaptarVenta(IVentaDTO venta) {
+    private VentaDTO adaptarVenta(VentaDTO venta) {
         if (venta == null) {
             return null;
         }

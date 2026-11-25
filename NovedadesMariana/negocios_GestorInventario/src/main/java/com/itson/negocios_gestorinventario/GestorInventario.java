@@ -31,17 +31,17 @@ public class GestorInventario implements IGestorInventario {
     }
      
     @Override
-    public IProductoDTO buscarProductoPorCodigo(String codigo) {
+    public ProductoDTO buscarProductoPorCodigo(String codigo) {
         return this.productoBO.obtenerPorCodigoBarras(codigo);
     }
 
     @Override
-    public IProductoDTO obtenerProductoPorId(int id) {
+    public ProductoDTO obtenerProductoPorId(int id) {
         return this.productoBO.obtenerPorId((long) id);
     }
 
     @Override
-    public List<? extends IProductoDTO> listarProductosPorCategoria(int idCategoria) {
+    public List<ProductoDTO> listarProductosPorCategoria(int idCategoria) {
         return this.productoBO.listarProductosPorCategoria((long) idCategoria);
     }
 

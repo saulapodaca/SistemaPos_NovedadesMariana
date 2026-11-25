@@ -96,6 +96,9 @@ public class UsuarioBO implements IUsuarioBO {
             throw new Exception("El usuario que desea eliminar no existe.");
         }
 
+        if (usuarioDAO.contarVentas(id) > 0) {
+            throw new IllegalStateException("No se puede eliminar el usuario porque tiene ventas registradas.");
+        }
         usuarioDAO.eliminar(id);
     }
 
@@ -126,10 +129,18 @@ public class UsuarioBO implements IUsuarioBO {
         }
         validarTexto(dto.getUsuario(), "El nombre de usuario es obligatorio.");
         validarTexto(dto.getContrasenia(), "La contraseña es obligatoria.");
+        validarTexto(dto.getNombres(), "El nombre del empleado es obligatorio.");
+        validarTexto(dto.getPrimerApellido(), "El primer apellido es obligatorio.");
+        if (dto.getUsuario().length() > 50 || dto.getContrasenia().length() > 255
+                || dto.getNombres().length() > 50 || dto.getPrimerApellido().length() > 50
+                || (dto.getSegundoApellido() != null && dto.getSegundoApellido().length() > 50)) {
+            throw new IllegalArgumentException("Los datos del usuario exceden la longitud permitida.");
+        }
+        validarTexto(dto.getRolEmpleado(), "El rol del empleado es obligatorio.");
     }
 
     private void validarTexto(String texto, String mensajeError) throws IllegalArgumentException {
-        if (texto == null || texto.trim().isEmpty()) {
+        if (texto == null || texto.isBlank()) {
             throw new IllegalArgumentException(mensajeError);
         }
     }

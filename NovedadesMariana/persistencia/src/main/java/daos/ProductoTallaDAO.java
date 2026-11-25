@@ -3,12 +3,12 @@ package daos;
 
 import dominio.Producto;
 import dominio.ProductoTalla;
-import dtos.ProductoTallaDTO;
 import conexion.ConexionJPA;
 import interfaces.IProductoTallaDAO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ProductoTallaDAO implements IProductoTallaDAO {
 
@@ -19,33 +19,12 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarProductoTalla(productoTalla);
-
-            if (productoTalla.getId() != null) {
-                throw new Exception(
-                    "Una talla nueva no debe tener ID."
-                );
-            }
-
-            if (productoTalla.getProducto() == null ||
-                productoTalla.getProducto().getId() == null) {
-                throw new Exception(
-                    "Debe seleccionar un producto registrado."
-                );
-            }
-
             em.getTransaction().begin();
 
-            Producto producto = em.find(
+            Producto producto = em.getReference(
                 Producto.class,
                 productoTalla.getProducto().getId()
             );
-
-            if (producto == null) {
-                throw new Exception(
-                    "El producto no existe."
-                );
-            }
 
             productoTalla.setProducto(producto);
 
@@ -69,51 +48,26 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
 
     @Override
     public void actualizar(ProductoTalla productoTalla) throws Exception {
+        modificar(productoTalla.getId(), existente -> {
+            existente.setTalla(productoTalla.getTalla());
+            existente.setStockActual(productoTalla.getStockActual());
+        });
+    }
+
+    @Override
+    public void modificar(Long id, Consumer<ProductoTalla> cambios) throws Exception {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarProductoTalla(productoTalla);
-
-            if (productoTalla.getId() == null) {
-                throw new Exception(
-                    "La talla debe tener un ID."
-                );
-            }
-
             em.getTransaction().begin();
 
             ProductoTalla existente = em.find(
                 ProductoTalla.class,
-                productoTalla.getId(),
+                id,
                 LockModeType.PESSIMISTIC_WRITE
             );
 
-            if (existente == null) {
-                throw new Exception(
-                    "La talla no existe."
-                );
-            }
-
-            // No permitir cambiar la talla de producto
-            if (productoTalla.getProducto() != null) {
-
-                Long idProducto = productoTalla
-                    .getProducto().getId();
-
-                if (idProducto == null ||
-                    !idProducto.equals(
-                        existente.getProducto().getId()
-                    )) {
-                    throw new Exception(
-                        "No se puede cambiar el producto asociado."
-                    );
-                }
-            }
-
-            existente.setTalla(productoTalla.getTalla());
-            existente.setStockActual(
-                productoTalla.getStockActual()
-            );
+            cambios.accept(existente);
 
             em.getTransaction().commit();
 
@@ -122,6 +76,9 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
                 em.getTransaction().rollback();
             }
 
+            if (e instanceof IllegalArgumentException || e instanceof IllegalStateException) {
+                throw e;
+            }
             throw new Exception(
                 "Error al actualizar talla: " + e.getMessage(), e
             );
@@ -133,15 +90,14 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
 
     @Override
     public void eliminar(Long id) throws Exception {
+        eliminar(id, talla -> {});
+    }
+
+    @Override
+    public void eliminar(Long id, Consumer<ProductoTalla> antesDeEliminar) throws Exception {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            if (id == null) {
-                throw new Exception(
-                    "Debe indicar el ID de la talla."
-                );
-            }
-
             em.getTransaction().begin();
 
             ProductoTalla talla = em.find(
@@ -150,19 +106,7 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
                 LockModeType.PESSIMISTIC_WRITE
             );
 
-            if (talla == null) {
-                throw new Exception(
-                    "La talla no existe."
-                );
-            }
-
-            if (talla.getStockActual() > 0) {
-                throw new Exception(
-                    "No se puede eliminar una talla " +
-                    "que tiene existencias disponibles."
-                );
-            }
-
+            antesDeEliminar.accept(talla);
             em.remove(talla);
 
             em.getTransaction().commit();
@@ -172,6 +116,9 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
                 em.getTransaction().rollback();
             }
 
+            if (e instanceof IllegalArgumentException || e instanceof IllegalStateException) {
+                throw e;
+            }
             throw new Exception(
                 "Error al eliminar talla: " + e.getMessage(), e
             );
@@ -186,10 +133,6 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            if (id == null) {
-                return null;
-            }
-
             ProductoTalla talla = em.find(
                 ProductoTalla.class, id
             );
@@ -224,12 +167,6 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
 
     @Override
     public List<ProductoTalla> obtenerPorProducto(Long idProducto) {
-        if (idProducto == null || idProducto <= 0) {
-            throw new IllegalArgumentException(
-                "El ID del producto debe ser mayor a cero."
-            );
-        }
-
         EntityManager em = conexion.getEntityManager();
         try {
             return em.createQuery(
@@ -242,31 +179,6 @@ public class ProductoTallaDAO implements IProductoTallaDAO {
             .getResultList();
         } finally {
             em.close();
-        }
-    }
-
-    // Validaciones basicas
-    private void validarProductoTalla(ProductoTalla productoTalla) {
-
-        if (productoTalla == null) {
-            throw new IllegalArgumentException(
-                "La talla no puede ser nula."
-            );
-        }
-
-        if (productoTalla.getTalla() == null ||
-            productoTalla.getTalla().isBlank() ||
-            productoTalla.getTalla().length() > 30) {
-            throw new IllegalArgumentException(
-                "La talla debe contener entre 1 y 30 caracteres."
-            );
-        }
-
-        if (productoTalla.getStockActual() == null ||
-            productoTalla.getStockActual() < 0) {
-            throw new IllegalArgumentException(
-                "El stock no puede ser nulo ni negativo."
-            );
         }
     }
 

@@ -6,13 +6,12 @@ package dtos;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import interfaces.IVentaDTO;
 
 /**
  *
  * @author saula
  */
-public class VentaDTO implements IVentaDTO {
+public class VentaDTO{
     private int id;
     private String folio;
     private LocalDateTime fechaHora;

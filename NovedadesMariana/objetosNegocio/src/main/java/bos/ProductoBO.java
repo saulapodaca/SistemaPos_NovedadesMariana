@@ -106,6 +106,9 @@ public class ProductoBO implements IProductoBO {
             throw new IllegalArgumentException("No se puede eliminar: el producto con ID " + id + " no existe.");
         }
 
+        if (productoDAO.contarDetallesVenta(id) > 0) {
+            throw new IllegalStateException("No se puede eliminar el producto porque tiene ventas registradas.");
+        }
         productoDAO.eliminar(id);
     }
 
@@ -129,7 +132,7 @@ public class ProductoBO implements IProductoBO {
 
     @Override
     public ProductoDTO obtenerPorSku(String sku) {
-        if (sku == null || sku.trim().isEmpty()) {
+        if (sku == null || sku.isBlank()) {
             throw new IllegalArgumentException("El SKU no puede ser nulo ni estar vacío.");
         }
         
@@ -138,7 +141,7 @@ public class ProductoBO implements IProductoBO {
 
     @Override
     public ProductoDTO obtenerPorCodigoBarras(String codigoBarras) {
-        if (codigoBarras == null || codigoBarras.trim().isEmpty()) {
+        if (codigoBarras == null || codigoBarras.isBlank()) {
             throw new IllegalArgumentException("El código de barras no puede ser nulo ni estar vacío.");
         }
 
@@ -160,7 +163,7 @@ public class ProductoBO implements IProductoBO {
 
     @Override
     public List<ProductoDTO> buscarProductos(String criterio) {
-        if (criterio == null || criterio.trim().isEmpty()) {
+        if (criterio == null || criterio.isBlank()) {
             throw new IllegalArgumentException("El criterio de búsqueda no puede estar vacío.");
         }
 
@@ -178,16 +181,16 @@ public class ProductoBO implements IProductoBO {
         if (productoDTO == null) {
             throw new IllegalArgumentException("El DTO del producto no puede ser nulo.");
         }
-        if (productoDTO.getCodigoBarras() == null || productoDTO.getCodigoBarras().trim().isEmpty()) {
+        if (productoDTO.getCodigoBarras() == null || productoDTO.getCodigoBarras().isBlank()) {
             throw new IllegalArgumentException("El código de barras es obligatorio.");
         }
-        if (productoDTO.getSku() == null || productoDTO.getSku().trim().isEmpty()) {
+        if (productoDTO.getSku() == null || productoDTO.getSku().isBlank()) {
             throw new IllegalArgumentException("El SKU es obligatorio.");
         }
-        if (productoDTO.getNombre() == null || productoDTO.getNombre().trim().isEmpty()) {
+        if (productoDTO.getNombre() == null || productoDTO.getNombre().isBlank()) {
             throw new IllegalArgumentException("El nombre del producto es obligatorio.");
         }
-        if (productoDTO.getDescripcion() == null || productoDTO.getDescripcion().trim().isEmpty()) {
+        if (productoDTO.getDescripcion() == null || productoDTO.getDescripcion().isBlank()) {
             throw new IllegalArgumentException("La descripción del producto es obligatoria.");
         }
         if (productoDTO.getPrecio() <= 0 || Float.isNaN(productoDTO.getPrecio()) || Float.isInfinite(productoDTO.getPrecio())) {

@@ -17,8 +17,6 @@ public class PagoDAO implements IPagoDAO {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarPago(pago);
-
             em.getTransaction().begin();
 
             em.persist(pago);
@@ -44,32 +42,11 @@ public class PagoDAO implements IPagoDAO {
         EntityManager em = conexion.getEntityManager();
 
         try {
-            validarPago(pago);
-
-            if (pago.getId() == null) {
-                throw new Exception(
-                    "El pago debe tener un ID."
-                );
-            }
-
             em.getTransaction().begin();
 
             Pago existente = em.find(
                 Pago.class, pago.getId()
             );
-
-            if (existente == null) {
-                throw new Exception(
-                    "El pago no existe."
-                );
-            }
-
-            if (estaAsociadoAVenta(em, pago.getId())) {
-                throw new Exception(
-                    "No se puede modificar un pago " +
-                    "asociado a una venta."
-                );
-            }
 
             existente.setMetodoPago(pago.getMetodoPago());
             existente.setMonto(pago.getMonto());
@@ -101,19 +78,6 @@ public class PagoDAO implements IPagoDAO {
             em.getTransaction().begin();
 
             Pago pago = em.find(Pago.class, id);
-
-            if (pago == null) {
-                throw new Exception(
-                    "El pago no existe."
-                );
-            }
-
-            if (estaAsociadoAVenta(em, id)) {
-                throw new Exception(
-                    "No se puede eliminar un pago " +
-                    "asociado a una venta."
-                );
-            }
 
             em.remove(pago);
 
@@ -147,12 +111,6 @@ public class PagoDAO implements IPagoDAO {
 
     @Override
     public Pago buscarPorVenta(Long idVenta) {
-        if (idVenta == null || idVenta <= 0) {
-            throw new IllegalArgumentException(
-                "El ID de venta debe ser mayor a cero."
-            );
-        }
-
         EntityManager em = conexion.getEntityManager();
         try {
             return em.createQuery(
@@ -184,67 +142,19 @@ public class PagoDAO implements IPagoDAO {
         }
     }
 
-
-    private boolean estaAsociadoAVenta(
-            EntityManager em, Long idPago) {
-
-        Long cantidad = em.createQuery(
-            "SELECT COUNT(v) FROM Venta v " +
-            "WHERE v.pago.id = :idPago",
-            Long.class
-        )
-        .setParameter("idPago", idPago)
-        .getSingleResult();
-
-        return cantidad > 0;
-    }
-
-
-    private void validarPago(Pago pago) {
-
-        if (pago == null) {
-            throw new IllegalArgumentException(
-                "El pago no puede ser nulo."
-            );
-        }
-
-        if (pago.getMetodoPago() == null) {
-            throw new IllegalArgumentException(
-                "Debe seleccionar un metodo de pago."
-            );
-        }
-
-        if (pago.getMonto() == null ||
-            !Float.isFinite(pago.getMonto()) ||
-            pago.getMonto() <= 0) {
-            throw new IllegalArgumentException(
-                "El monto debe ser mayor a cero."
-            );
-        }
-
-        if (pago.getMontoRecibido() != null &&
-            (!Float.isFinite(pago.getMontoRecibido()) ||
-             pago.getMontoRecibido() < 0)) {
-            throw new IllegalArgumentException(
-                "El monto recibido no es valido."
-            );
-        }
-
-        if (pago.getCambio() != null &&
-            (!Float.isFinite(pago.getCambio()) ||
-             pago.getCambio() < 0)) {
-            throw new IllegalArgumentException(
-                "El cambio no es valido."
-            );
-        }
-
-        if (pago.getFechaHora() == null) {
-            throw new IllegalArgumentException(
-                "Debe especificar la fecha del pago."
-            );
+    @Override
+    public long contarVentas(Long idPago) {
+        EntityManager em = conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                "SELECT COUNT(v) FROM Venta v " +
+                "WHERE v.pago.id = :idPago",
+                Long.class
+            )
+            .setParameter("idPago", idPago)
+            .getSingleResult();
+        } finally {
+            em.close();
         }
     }
-
-
-
 }

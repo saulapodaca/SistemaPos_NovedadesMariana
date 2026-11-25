@@ -1,6 +1,7 @@
 package bos;
 
-import java.util.IdentityHashMap;
+import java.util.HashMap;
+import dominio.ProductoTalla;
 
 import java.util.Map;
 
@@ -16,6 +17,8 @@ import interfaces.IPagoBO;
 import interfaces.IVentaBO;
 import daos.ProductoTallaDAO;
 import daos.VentaDAO;
+import daos.UsuarioDAO;
+import interfaces.IUsuarioDAO;
 import interfaces.IProductoTallaDAO;
 import interfaces.IVentaDAO;
 import mappers.VentaMapper;
@@ -34,12 +37,19 @@ public class VentaBO implements IVentaBO {
     private final IVentaDAO ventaDAO;
     private final IProductoTallaDAO productoTallaDAO;
     private final IPagoBO pagoBO;
+    private final IUsuarioDAO usuarioDAO;
 
     private VentaBO() {
         this(new VentaDAO(), new ProductoTallaDAO(), PagoBO.getInstance());
     }
 
     public VentaBO(IVentaDAO ventaDAO, IProductoTallaDAO productoTallaDAO, IPagoBO pagoBO) {
+        this(ventaDAO, productoTallaDAO, pagoBO, new UsuarioDAO());
+    }
+
+    public VentaBO(IVentaDAO ventaDAO, IProductoTallaDAO productoTallaDAO, IPagoBO pagoBO,
+            IUsuarioDAO usuarioDAO) {
+        this.usuarioDAO = java.util.Objects.requireNonNull(usuarioDAO);
         this.ventaDAO = java.util.Objects.requireNonNull(ventaDAO);
         this.productoTallaDAO = java.util.Objects.requireNonNull(productoTallaDAO);
         this.pagoBO = java.util.Objects.requireNonNull(pagoBO);
@@ -59,6 +69,9 @@ public class VentaBO implements IVentaBO {
         if (ventaDTO.getFolio() == null || ventaDTO.getFolio().isBlank()) {
             ventaDTO.setFolio("VEN-" + UUID.randomUUID().toString().replace("-", ""));
         }
+        if (ventaDTO.getFolio().length() > 50) {
+            throw new IllegalArgumentException("El folio no puede exceder los 50 caracteres.");
+        }
         if (ventaDTO.getFechaHora() == null) {
             ventaDTO.setFechaHora(LocalDateTime.now());
         }
@@ -69,8 +82,25 @@ public class VentaBO implements IVentaBO {
                 ventaDTO.getIdUsuario(), ventaDTO.getDetalles(), List.of(pagoPreparado));
 
         try {
-            dominio.Venta entidad = VentaMapper.toEntity(ventaPreparada, productoTallaDAO);
-            ventaDAO.guardarConTallas(entidad, tallasPorDetalle(entidad, ventaPreparada));
+            if (usuarioDAO.buscarPorId((long) ventaPreparada.getIdUsuario()) == null) {
+                throw new IllegalArgumentException("El usuario de la venta no existe.");
+            }
+            Venta entidad = VentaMapper.toEntity(ventaPreparada, this::obtenerTalla);
+            PagoBO.validarPagoPersistible(entidad.getPago());
+            Map<Long, Integer> cantidades = new HashMap<>();
+            Map<Long, Long> productosPorTalla = new HashMap<>();
+            for (int i = 0; i < entidad.getDetalles().size(); i++) {
+                DetalleVenta detalle = entidad.getDetalles().get(i);
+                long idTalla = ventaPreparada.getDetalles().get(i).getIdProductoTalla();
+                Long idProducto = detalle.getProducto().getId();
+                Long anterior = productosPorTalla.putIfAbsent(idTalla, idProducto);
+                if (anterior != null && !anterior.equals(idProducto)) {
+                    throw new IllegalArgumentException("Una talla no corresponde al producto.");
+                }
+                cantidades.merge(idTalla, detalle.getCantidad(), Math::addExact);
+            }
+            ventaDAO.guardarConTallas(entidad, cantidades.keySet(),
+                    tallas -> descontarInventario(tallas, cantidades, productosPorTalla));
             if (entidad.getId() != null) ventaPreparada.setId(entidad.getId().intValue());
             if (entidad.getId() != null) {
                 PagoDTO pagoPersistido = PagoMapper.toDTO(entidad.getPago());
@@ -80,7 +110,7 @@ public class VentaBO implements IVentaBO {
                 }
             }
             return ventaPreparada;
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             throw e;
         } catch (Exception e) {
             throw new IllegalStateException("No se pudo registrar la venta.", e);
@@ -224,12 +254,26 @@ public class VentaBO implements IVentaBO {
                 && Math.abs(actual - esperado) <= IMPORTE_TOLERANCE;
     }
 
-    private Map<DetalleVenta, Long> tallasPorDetalle(Venta venta, VentaDTO dto) {
-        Map<DetalleVenta, Long> resultado = new IdentityHashMap<>();
-        if (venta == null || dto == null || venta.getDetalles() == null || dto.getDetalles() == null) return resultado;
-        for (int i = 0; i < Math.min(venta.getDetalles().size(), dto.getDetalles().size()); i++) {
-            resultado.put(venta.getDetalles().get(i), (long) dto.getDetalles().get(i).getIdProductoTalla());
+    private ProductoTalla obtenerTalla(long id) {
+        ProductoTalla talla = productoTallaDAO.buscarProductoTallaPorId(id);
+        if (talla == null || talla.getProducto() == null) {
+            throw new IllegalArgumentException("No existe la talla de producto " + id);
         }
-        return resultado;
+        return talla;
+    }
+
+    private static void descontarInventario(Map<Long, ProductoTalla> tallas,
+            Map<Long, Integer> cantidades, Map<Long, Long> productosPorTalla) {
+        for (Map.Entry<Long, ProductoTalla> entrada : tallas.entrySet()) {
+            Long idTalla = entrada.getKey();
+            ProductoTalla talla = entrada.getValue();
+            if (talla == null) {
+                throw new IllegalArgumentException("La talla seleccionada no existe.");
+            }
+            if (!talla.getProducto().getId().equals(productosPorTalla.get(idTalla))) {
+                throw new IllegalArgumentException("La talla no pertenece al producto.");
+            }
+            ProductoTallaBO.descontarStock(talla, cantidades.get(idTalla));
+        }
     }
 }

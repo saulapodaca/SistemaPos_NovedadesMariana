@@ -152,6 +152,19 @@ class VentaBOTest {
     }
 
     @Test
+    void rechazaCantidadesAcumuladasQueExcedenElStock() {
+        VentaDTO dto = fixture.nuevaVenta(22);
+        DetalleVentaDTO linea = dto.getDetalles().get(0);
+        linea.setCantidad(11);
+        linea.setSubtotal(11 * linea.getPrecioUnitario());
+        dto.setDetalles(List.of(linea, linea));
+
+        assertThrows(IllegalStateException.class, () -> ventaBO.registrarVenta(dto));
+        assertNull(ventaBO.obtenerPorFolio(dto.getFolio()));
+        assertTrue(bos.ProductoTallaBO.getInstance().validarStockDisponible(linea.getIdProductoTalla(), 20));
+    }
+
+    @Test
     void cancelarVentaEliminaVentaYDevuelveFalseParaVentaInexistente() {
         VentaDTO registrada = fixture.registrarVenta(2);
 
