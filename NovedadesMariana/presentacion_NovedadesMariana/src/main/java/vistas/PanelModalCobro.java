@@ -20,7 +20,7 @@ public final class PanelModalCobro extends JPanel {
     private final JLabel lblDesgloseCambio = new JLabel();
     private final JLabel lblRecibido = new JLabel("EFECTIVO RECIBIDO");
     private final JLabel lblConceptoRecibido = new JLabel("Efectivo recibido");
-    private final JButton confirmar = new JButton("Confirmar Pago e Imprimir Ticket");
+    private final JButton confirmar = Estilo.boton("Confirmar Pago e Imprimir Ticket", true);
     private final List<AbstractButton> controlesEfectivo = new ArrayList<>();
     private final List<JToggleButton> pestañas = new ArrayList<>();
     private final ControlRealizarVenta control;
@@ -301,16 +301,9 @@ public final class PanelModalCobro extends JPanel {
     }
 
     private JButton botonSecundario(String texto) {
-        JButton boton = new JButton(texto);
-        boton.setFont(new Font("SansSerif", Font.BOLD, 12));
-        boton.setBackground(Estilo.FONDO_TECLAS);
-        boton.setForeground(Estilo.TEXTO_SECUNDARIO);
-        boton.setFocusPainted(false);
+        JButton boton = Estilo.boton(texto, false);
         boton.setAlignmentX(LEFT_ALIGNMENT);
-        boton.setMaximumSize(new Dimension(Short.MAX_VALUE, 32));
-        boton.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Estilo.BORDE_TARJETA), new EmptyBorder(5, 3, 5, 3)));
-        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        boton.setMaximumSize(new Dimension(Short.MAX_VALUE, 38));
         return boton;
     }
 
