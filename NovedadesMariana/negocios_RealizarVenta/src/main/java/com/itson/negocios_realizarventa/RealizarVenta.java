@@ -8,6 +8,8 @@ import com.itson.negocios_gestorinventario.GestorInventario;
 import com.itson.negocios_gestorinventario.IGestorInventario;
 import com.itson.negocios_gestorventas.GestorVentas;
 import com.itson.negocios_gestorventas.IGestorVentas;
+import com.itson.tickets.GeneradorTicket;
+import com.itson.facturacion.ServicioFacturacion;
 import dtos.DatosFiscalesDTO;
 import dtos.DetalleVentaDTO;
 import dtos.VentaDTO;
@@ -20,14 +22,12 @@ public class RealizarVenta implements IRealizarVenta {
 
     private final IGestorVentas gestorVentas;
     private final IGestorInventario gestorInventario;
-    //private final IGeneradorTicket generadorTicket;
-    //private final IServicioFacturacion servicioFacturacion;
+    private final GeneradorTicket generadorTicket = new GeneradorTicket();
+    private final ServicioFacturacion servicioFacturacion = new ServicioFacturacion();
 
     public RealizarVenta() {
         this.gestorVentas = new GestorVentas();
         this.gestorInventario = new GestorInventario();
-        //this.generadorTicket = new GeneradorTicket();
-        //this.servicioFacturacion = new ServicioFacturacion();
     }
 
     @Override
@@ -62,18 +62,12 @@ public class RealizarVenta implements IRealizarVenta {
         if (venta == null) {
             return false;
         }
-        // No hay una implementación de impresión conectada todavía.
-        return false;
+        return generadorTicket.imprimir(venta);
     }
 
     @Override
     public boolean solicitarFactura(int idVenta, DatosFiscalesDTO datosFiscales) {
-        VentaDTO venta = adaptarVenta(gestorVentas.obtenerVentaPorId(idVenta));
-        if (venta == null) {
-            return false;
-        }
-        // No hay una implementación de facturación conectada todavía.
-        return false;
+        return servicioFacturacion.solicitar(idVenta, datosFiscales);
     }
 
     private VentaDTO adaptarVenta(VentaDTO venta) {

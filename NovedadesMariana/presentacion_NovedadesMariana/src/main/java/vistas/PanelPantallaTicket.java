@@ -52,10 +52,48 @@ public final class PanelPantallaTicket extends JPanel {
         JButton imprimir = Estilo.boton("Imprimir ticket", false);
         imprimir.addActionListener(e -> navegacion.ejecutar(control::imprimirTicket, impreso ->
                 navegacion.informar(impreso ? "Ticket enviado a impresión."
-                        : "La venta está guardada. El servicio de impresión aún no está disponible.")));
+                        : "No se encontró la venta para imprimir.")));
         JButton nueva = Estilo.boton("Nueva venta", true);
         nueva.addActionListener(e -> navegacion.nuevaVenta());
+        JButton factura = Estilo.boton("Solicitar factura", false);
+        factura.addActionListener(e -> {
+            JTextField rfc = new JTextField();
+            JTextField nombre = new JTextField();
+            JTextField cp = new JTextField();
+            JTextField regimen = new JTextField();
+            JTextField uso = new JTextField();
+            JTextField correo = new JTextField();
+            JPanel campos = new JPanel(new GridLayout(0, 1, 2, 3));
+            Object[][] entradas = {{"RFC", rfc}, {"Nombre o razón social", nombre},
+                    {"Código postal fiscal", cp}, {"Clave de régimen fiscal", regimen},
+                    {"Clave de uso del CFDI", uso}, {"Correo (opcional)", correo}};
+            for (Object[] entrada : entradas) {
+                JLabel etiqueta = new JLabel((String) entrada[0]);
+                JTextField campo = (JTextField) entrada[1];
+                etiqueta.setLabelFor(campo);
+                campos.add(etiqueta);
+                campos.add(campo);
+            }
+            JButton enviar = Estilo.boton("Registrar solicitud", true);
+            enviar.addActionListener(evento -> {
+                DatosFiscalesDTO datos = new DatosFiscalesDTO(rfc.getText(), nombre.getText(),
+                        cp.getText(), regimen.getText(), uso.getText(), correo.getText());
+                navegacion.ejecutar(() -> control.solicitarFactura(venta.getId(), datos), registrada -> {
+                    if (!registrada) throw new IllegalStateException("No se pudo registrar la solicitud.");
+                    factura.setEnabled(false);
+                    factura.setText("Solicitud pendiente");
+                    navegacion.cerrarModal();
+                    navegacion.informar("Solicitud guardada para la venta " + venta.getFolio() + ". Pendiente de facturación.");
+                });
+            });
+            JPanel panel = Estilo.vertical();
+            panel.add(campos);
+            panel.add(enviar);
+            navegacion.mostrarModal("Solicitar factura · " + venta.getFolio(), panel, 470, 480);
+        });
         lateral.add(imprimir);
+        lateral.add(Box.createVerticalStrut(12));
+        lateral.add(factura);
         lateral.add(Box.createVerticalStrut(12));
         lateral.add(nueva);
         add(lateral, BorderLayout.EAST);

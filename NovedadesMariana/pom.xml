@@ -14,6 +14,8 @@
         <module>negocios_GestorInventario</module>
         <module>negocios_GestorVentas</module>
         <module>negocios_GestorPagos</module>
+        <module>negocios_GeneradorTicket</module>
+        <module>negocios_ServicioFacturacion</module>
         <module>negocios_RealizarVenta</module>
         <module>presentacion_NovedadesMariana</module>
     </modules>

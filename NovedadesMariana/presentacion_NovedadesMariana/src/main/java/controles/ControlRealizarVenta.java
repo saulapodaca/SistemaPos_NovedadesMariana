@@ -162,6 +162,11 @@ public final class ControlRealizarVenta {
         return venta;
     }
 
+    public boolean solicitarFactura(int idVenta, DatosFiscalesDTO datos) {
+        if (idVenta <= 0) throw new IllegalStateException("Registra la venta primero.");
+        return facade().solicitarFactura(idVenta, datos);
+    }
+
     public boolean imprimirTicket() {
         if (venta.getId() <= 0) throw new IllegalStateException("Registra la venta primero.");
         return facade().imprimirTicket(venta.getId());
