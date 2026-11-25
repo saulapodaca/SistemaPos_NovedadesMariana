@@ -138,7 +138,7 @@ public final class PanelInventario extends JPanel {
 
         JButton btnNuevo = Estilo.botonPersonalizado(
                 "+ Registrar Producto", Estilo.VERDE_COBRO, Estilo.VERDE_OSCURO, Color.WHITE);
-        btnNuevo.addActionListener(e -> abrirModalNuevoProducto());
+        btnNuevo.addActionListener(null);
         accionesTop.add(btnActualizar);
         accionesTop.add(btnNuevo);
 

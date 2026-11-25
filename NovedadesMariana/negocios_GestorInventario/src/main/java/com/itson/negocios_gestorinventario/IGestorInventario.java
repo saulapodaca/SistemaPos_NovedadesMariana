@@ -3,8 +3,6 @@ package com.itson.negocios_gestorinventario;
 import dtos.CategoriaDTO;
 import dtos.ProductoDTO;
 import dtos.ProductoTallaDTO;
-import interfaces.IProductoDTO;
-import interfaces.IProductoTallaDTO;
 import java.util.List;
 
 /**
@@ -12,7 +10,7 @@ import java.util.List;
  */
 public interface IGestorInventario {
 
-    IProductoDTO buscarProductoPorCodigo(String codigo);
+    ProductoDTO buscarProductoPorCodigo(String codigo);
 
     ProductoDTO obtenerProductoPorId(int id);
 
@@ -26,11 +24,11 @@ public interface IGestorInventario {
 
     boolean reabastecerStock(int idProductoTalla, int cantidad);
 
-    boolean ajustarStock(int idProductoTalla, int nuevoStock);
+    boolean ajustarStock(int idProductoTalla, int nuevoStock)  throws Exception;
 
-    List<? extends IProductoDTO> buscarProductos(String criterio);
+    List<ProductoDTO> buscarProductos(String criterio);
 
-    List<? extends IProductoDTO> buscarProductosPorCategoria(String nombre);
+    List<ProductoDTO> buscarProductosPorCategoria(String nombre);
 
     List<ProductoDTO> obtenerTodosLosProductos();
 

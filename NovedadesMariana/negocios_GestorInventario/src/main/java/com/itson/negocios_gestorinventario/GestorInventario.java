@@ -8,9 +8,7 @@ import dtos.ProductoDTO;
 import dtos.ProductoTallaDTO;
 import interfaces.ICategoriaBO;
 import interfaces.IProductoBO;
-import interfaces.IProductoDTO;
 import interfaces.IProductoTallaBO;
-import interfaces.IProductoTallaDTO;
 import java.util.List;
 
 /**
@@ -66,7 +64,7 @@ public class GestorInventario implements IGestorInventario {
     }
 
     @Override
-    public boolean ajustarStock(int idProductoTalla, int nuevoStock) {
+    public boolean ajustarStock(int idProductoTalla, int nuevoStock)  throws Exception{
         return this.productoTallaBO.ajustarStock(idProductoTalla, nuevoStock);
     }
 

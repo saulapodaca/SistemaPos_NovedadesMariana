@@ -18,7 +18,7 @@ public interface IProductoTallaBO {
 
     boolean reabastecerStock(int idProductoTalla, int cantidad);
 
-    boolean ajustarStock(int idProductoTalla, int nuevoStock);
+    boolean ajustarStock(int idProductoTalla, int nuevoStock)  throws Exception;
 
     void guardarTalla(ProductoTallaDTO talla) throws Exception;
 

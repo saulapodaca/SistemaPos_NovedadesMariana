@@ -34,10 +34,11 @@ public final class PanelModalEditarProducto extends JPanel {
     private final JComboBox<TipoPrendaDTO> comboTipoPrenda = new JComboBox<>(TipoPrendaDTO.values());
     private final JPanel panelCategorias = new JPanel(new GridLayout(0, 2, 8, 4));
     private final Map<Long, JCheckBox> checksCategorias = new LinkedHashMap<>();
-// Tallas iniciales solo al registrar nuevo producto
+
+    // Tallas iniciales solo al registrar nuevo producto
     private final DefaultTableModel modeloTallas = new DefaultTableModel(new String[]{"Talla", "Stock Inicial"}, 0);
     private final JTable tablaTallas = new JTable(modeloTallas);
-    private final JButton btnGuardar = Estilo.boton("Guardar Producto", true);
+    private final JButton btnGuardar = Estilo.boton("Guardar", true);
     private final JButton btnCancelar = Estilo.boton("Cancelar", false);
 
     public PanelModalEditarProducto(ProductoDTO producto,
@@ -45,11 +46,13 @@ public final class PanelModalEditarProducto extends JPanel {
                                     ControlNavegacion navegacion,
                                     Runnable alTerminar) {
         super(new BorderLayout());
-        this.productoOriginal = Objects.requireNonNull(producto, "El producto a modificar es requerido.");
+        this.productoOriginal = producto;
         this.esNuevo = (producto == null || producto.getId() == null);
         this.control = control;
         this.navegacion = navegacion;
         this.alTerminar = alTerminar;
+
+        btnGuardar.setText(esNuevo ? "Guardar Producto" : "Guardar Cambios");
 
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(600, esNuevo ? 720 : 620));
@@ -70,7 +73,7 @@ public final class PanelModalEditarProducto extends JPanel {
         titulo.setFont(new Font("SansSerif", Font.BOLD, 17));
         titulo.setForeground(Color.WHITE);
 
-         JLabel subtitulo = new JLabel(esNuevo ?
+        JLabel subtitulo = new JLabel(esNuevo ?
                 "Ingresa la información básica y las existencias iniciales." :
                 "Actualiza el precio, descripción y clasificación del producto.");
         subtitulo.setFont(new Font("SansSerif", Font.PLAIN, 12));
@@ -157,15 +160,17 @@ public final class PanelModalEditarProducto extends JPanel {
         cargarChecksCategorias();
         panel.add(panelCategorias);
         panel.add(Box.createVerticalStrut(14));
-        
+
         // Tallas iniciales solo si es nuevo producto
         if (esNuevo) {
             panel.add(etiqueta("Tallas y Existencias Iniciales:"));
             panel.add(Box.createVerticalStrut(6));
+
             modeloTallas.setRowCount(0);
             modeloTallas.addRow(new Object[]{"2T", 10});
             modeloTallas.addRow(new Object[]{"4T", 10});
             modeloTallas.addRow(new Object[]{"6T", 10});
+
             tablaTallas.setRowHeight(26);
             tablaTallas.setBackground(Color.WHITE);
             tablaTallas.setForeground(Estilo.TEXTO_OSCURO);
@@ -174,12 +179,30 @@ public final class PanelModalEditarProducto extends JPanel {
             scrollTallas.setPreferredSize(new Dimension(0, 110));
             scrollTallas.setBorder(BorderFactory.createLineBorder(Estilo.BORDE_TARJETA, 1));
             panel.add(scrollTallas);
+
             JPanel barraTallas = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
             barraTallas.setOpaque(false);
             JButton btnMasTalla = Estilo.botonPersonalizado(
                     "+ Agregar Fila", new Color(241, 245, 249), new Color(203, 213, 225), Estilo.TEXTO_OSCURO);
             btnMasTalla.setFont(new Font("SansSerif", Font.BOLD, 11));
+            btnMasTalla.setBorder(new EmptyBorder(5, 12, 5, 12));
+            btnMasTalla.addActionListener(e -> modeloTallas.addRow(new Object[]{"", 0}));
+
+            JButton btnMenosTalla = Estilo.botonPersonalizado(
+                    "Quitar Fila", new Color(254, 226, 226), new Color(252, 165, 165), new Color(185, 28, 28));
+            btnMenosTalla.setFont(new Font("SansSerif", Font.BOLD, 11));
+            btnMenosTalla.setBorder(new EmptyBorder(5, 12, 5, 12));
+            btnMenosTalla.addActionListener(e -> {
+                int sel = tablaTallas.getSelectedRow();
+                if (sel >= 0) modeloTallas.removeRow(sel);
+                else if (modeloTallas.getRowCount() > 0) modeloTallas.removeRow(modeloTallas.getRowCount() - 1);
+            });
+
+            barraTallas.add(btnMasTalla);
+            barraTallas.add(btnMenosTalla);
+            panel.add(barraTallas);
         }
+
         for (Component c : panel.getComponents()) {
             if (c instanceof JComponent jc) jc.setAlignmentX(LEFT_ALIGNMENT);
         }
@@ -281,6 +304,7 @@ public final class PanelModalEditarProducto extends JPanel {
         }
 
         TipoPrendaDTO tipoPrenda = (TipoPrendaDTO) comboTipoPrenda.getSelectedItem();
+
         List<ProductoTallaDTO> tallasIniciales = new ArrayList<>();
         if (esNuevo) {
             if (tablaTallas.isEditing()) tablaTallas.getCellEditor().stopCellEditing();
@@ -305,6 +329,7 @@ public final class PanelModalEditarProducto extends JPanel {
                 return;
             }
         }
+
         navegacion.ejecutar(() -> {
             if (esNuevo) {
                 ProductoDTO nuevo = new ProductoDTO(cb, sku, nom, desc, precio, tipoPrenda, categoriasSeleccionadas);
@@ -319,7 +344,7 @@ public final class PanelModalEditarProducto extends JPanel {
             navegacion.cerrarModal();
             if (alTerminar != null) alTerminar.run();
             JOptionPane.showMessageDialog(this,
-                    esNuevo ? "Producto registrado con éxito en el catálogo." : "Producto ",
+                    esNuevo ? "Producto registrado con éxito en el catálogo." : "Producto actualizado con éxito.",
                     "Operación Exitosa", JOptionPane.INFORMATION_MESSAGE);
         });
     }

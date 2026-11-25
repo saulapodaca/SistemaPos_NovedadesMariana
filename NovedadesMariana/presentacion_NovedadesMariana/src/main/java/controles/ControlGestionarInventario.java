@@ -48,10 +48,10 @@ public final class ControlGestionarInventario {
         if (criterio == null || criterio.isBlank()) {
             return cargarInventario();
         }
-        List<? extends interfaces.IProductoDTO> encontrados = gestorInventario.buscarProductos(criterio.trim());
+        List<ProductoDTO> encontrados = gestorInventario.buscarProductos(criterio.trim());
         List<ProductoDTO> resultado = new ArrayList<>();
         if (encontrados != null) {
-            for (interfaces.IProductoDTO p : encontrados) {
+            for (ProductoDTO p : encontrados) {
                 if (p instanceof ProductoDTO dto) {
                     resultado.add(dto);
                 }
@@ -67,10 +67,10 @@ public final class ControlGestionarInventario {
         if (nombreCategoria == null || nombreCategoria.isBlank() || "Todas".equalsIgnoreCase(nombreCategoria.trim())) {
             return cargarInventario();
         }
-        List<? extends interfaces.IProductoDTO> encontrados = gestorInventario.buscarProductosPorCategoria(nombreCategoria.trim());
+        List<ProductoDTO> encontrados = gestorInventario.buscarProductosPorCategoria(nombreCategoria.trim());
         List<ProductoDTO> resultado = new ArrayList<>();
         if (encontrados != null) {
-            for (interfaces.IProductoDTO p : encontrados) {
+            for (ProductoDTO p : encontrados) {
                 if (p instanceof ProductoDTO dto) {
                     resultado.add(dto);
                 }
@@ -83,10 +83,10 @@ public final class ControlGestionarInventario {
      * Consulta las tallas y existencias de un producto.
      */
     public List<ProductoTallaDTO> obtenerTallas(int idProducto) {
-        List<? extends interfaces.IProductoTallaDTO> tallas = gestorInventario.obtenerTallasPorProducto(idProducto);
+        List<ProductoTallaDTO> tallas = gestorInventario.obtenerTallasPorProducto(idProducto);
         List<ProductoTallaDTO> resultado = new ArrayList<>();
         if (tallas != null) {
-            for (interfaces.IProductoTallaDTO t : tallas) {
+            for (ProductoTallaDTO t : tallas) {
                 if (t instanceof ProductoTallaDTO dto) {
                     resultado.add(dto);
                 }
@@ -120,7 +120,7 @@ public final class ControlGestionarInventario {
     /**
      * Ajusta el stock a un conteo físico exacto.
      */
-    public boolean ajustarStock(int idProductoTalla, int nuevoStock) {
+    public boolean ajustarStock(int idProductoTalla, int nuevoStock)  throws Exception{
         if (nuevoStock < 0) {
             throw new IllegalArgumentException("El stock no puede ser un valor negativo.");
         }

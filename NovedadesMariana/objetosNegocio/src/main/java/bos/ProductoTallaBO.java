@@ -65,7 +65,7 @@ public class ProductoTallaBO implements IProductoTallaBO {
     }
 
     @Override
-    public synchronized boolean ajustarStock(int idProductoTalla, int nuevoStock) {
+    public synchronized boolean ajustarStock(int idProductoTalla, int nuevoStock) throws Exception{
         if (idProductoTalla <= 0) {
             throw new IllegalArgumentException("El ID de la talla debe ser mayor a cero.");
         }
@@ -74,7 +74,7 @@ public class ProductoTallaBO implements IProductoTallaBO {
         }
         ProductoTallaDTO talla = buscarTalla(idProductoTalla);
         talla.setStockActual(nuevoStock);
-        actualizar(talla);
+        actualizar(ProductoTallaMapper.toEntity(talla));
         return true;
     }
 
