@@ -1,6 +1,7 @@
 package controles;
 
 import vistas.*;
+import com.itson.negocios_administradorempleados.fachada.AdministradorEmpleadosFacade;
 import utilerias.EjecutorTareas;
 import java.awt.*;
 import java.util.concurrent.Callable;
@@ -41,7 +42,10 @@ public final class ControlNavegacion {
                     + " " + control.getUsuario().getPrimerApellido());
         }
         formPrincipal.setNavegacionListener(modulo -> {
-            if ("VENTAS".equalsIgnoreCase(modulo)) {
+            if (estaOcupado()) return;
+            if ("EMPLEADOS".equals(modulo)) {
+                abrirMenuEmpleados();
+            } else if ("VENTAS".equalsIgnoreCase(modulo)) {
                 abrirMenuVentas();
             } else if ("INVENTARIO".equalsIgnoreCase(modulo)) {
                 abrirMenuInventario();
@@ -49,6 +53,31 @@ public final class ControlNavegacion {
         });
         abrirMenuVentas();
         formPrincipal.setVisible(true);
+    }
+
+    private void abrirMenuEmpleados() {
+        var fachada = new AdministradorEmpleadosFacade();
+        JTextField usuario = new JTextField(20);
+        JPasswordField clave = new JPasswordField(20);
+        Object[] campos = {"Usuario de administradora", usuario, "Contraseña", clave};
+        if (JOptionPane.showConfirmDialog(formPrincipal, campos, "Gestión de empleados",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION) return;
+        String nombre = usuario.getText().trim();
+        char[] caracteres = clave.getPassword();
+        String password = new String(caracteres);
+        java.util.Arrays.fill(caracteres, '\0');
+        clave.setText("");
+        ejecutar(() -> fachada.autenticarAdministradora(nombre, password), permitido -> {
+            if (!permitido) {
+                error(new IllegalArgumentException("Ingresa las credenciales de una administradora."));
+                return;
+            }
+            if (panelVenta != null) panelVenta.detenerBusqueda();
+            PanelEmpleados panel = new PanelEmpleados(fachada, this);
+            formPrincipal.seleccionarModulo("EMPLEADOS");
+            formPrincipal.mostrarPanel(panel);
+            panel.cargar();
+        });
     }
 
     public void abrirMenuVentas() {

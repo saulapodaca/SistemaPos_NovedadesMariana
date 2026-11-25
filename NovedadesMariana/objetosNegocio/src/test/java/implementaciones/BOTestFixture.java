@@ -102,6 +102,22 @@ final class BOTestFixture implements AutoCloseable {
         return registrada;
     }
 
+    static void borrarUsuarioDePrueba(Long id, String nombreUsuario) {
+        try (var em = conexion.ConexionJPA.getInstance().getEntityManager()) {
+            var tx = em.getTransaction();
+            tx.begin();
+            try {
+                var usuario = em.find(Usuario.class, id);
+                if (usuario != null && nombreUsuario.equals(usuario.getUsuario())) {
+                    em.remove(usuario);
+                }
+                tx.commit();
+            } finally {
+                if (tx.isActive()) tx.rollback();
+            }
+        }
+    }
+
     @Override
     public void close() throws Exception {
         if (idVenta != null && ventaDAO.buscarVentaPorId(idVenta) != null) {
@@ -113,8 +129,8 @@ final class BOTestFixture implements AutoCloseable {
         if (categoria.getId() != null && categoriaDAO.buscarCategoriaPorId(categoria.getId()) != null) {
             categoriaDAO.eliminar(categoria.getId());
         }
-        if (usuario.getId() != null && usuarioDAO.buscarPorId(usuario.getId()) != null) {
-            usuarioDAO.eliminar(usuario.getId());
+        if (usuario.getId() != null) {
+            borrarUsuarioDePrueba(usuario.getId(), usuario.getUsuario());
         }
     }
 }

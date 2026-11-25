@@ -72,9 +72,7 @@ public class ProductoTallaBO implements IProductoTallaBO {
         if (nuevoStock < 0) {
             throw new IllegalArgumentException("El nuevo stock no puede ser un valor negativo.");
         }
-        ProductoTallaDTO talla = buscarTalla(idProductoTalla);
-        talla.setStockActual(nuevoStock);
-        actualizar(talla);
+        modificarStock(idProductoTalla, talla -> talla.setStockActual(nuevoStock));
         return true;
     }
 

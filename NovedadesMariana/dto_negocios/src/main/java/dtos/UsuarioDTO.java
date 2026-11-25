@@ -33,6 +33,16 @@ public class UsuarioDTO{
         this.rolEmpleado = rolEmpleado;
     }
 
+    private boolean activo = true;
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
     public Long getId() {
         return id;
     }

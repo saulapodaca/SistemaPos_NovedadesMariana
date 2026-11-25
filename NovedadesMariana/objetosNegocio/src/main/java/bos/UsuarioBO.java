@@ -43,7 +43,7 @@ public class UsuarioBO implements IUsuarioBO {
         validarTexto(contrasenia, "La contraseña es obligatoria.");
 
         UsuarioDTO usuarioEncontrado = UsuarioMapper.toDTO(usuarioDAO.buscarPorUsuario(usuario));
-        if (usuarioEncontrado == null
+        if (usuarioEncontrado == null || !usuarioEncontrado.isActivo()
                 || !contrasenia.equals(usuarioEncontrado.getContrasenia())) {
             return null;
         }
@@ -96,9 +96,6 @@ public class UsuarioBO implements IUsuarioBO {
             throw new Exception("El usuario que desea eliminar no existe.");
         }
 
-        if (usuarioDAO.contarVentas(id) > 0) {
-            throw new IllegalStateException("No se puede eliminar el usuario porque tiene ventas registradas.");
-        }
         usuarioDAO.eliminar(id);
     }
 
@@ -128,10 +125,12 @@ public class UsuarioBO implements IUsuarioBO {
             throw new IllegalArgumentException("El usuario no puede ser nulo.");
         }
         validarTexto(dto.getUsuario(), "El nombre de usuario es obligatorio.");
-        validarTexto(dto.getContrasenia(), "La contraseña es obligatoria.");
+        if (dto.getId() == null || dto.getContrasenia() != null) {
+            validarTexto(dto.getContrasenia(), "La contraseña es obligatoria.");
+        }
         validarTexto(dto.getNombres(), "El nombre del empleado es obligatorio.");
         validarTexto(dto.getPrimerApellido(), "El primer apellido es obligatorio.");
-        if (dto.getUsuario().length() > 50 || dto.getContrasenia().length() > 255
+        if (dto.getUsuario().length() > 50 || (dto.getContrasenia() != null && dto.getContrasenia().length() > 255)
                 || dto.getNombres().length() > 50 || dto.getPrimerApellido().length() > 50
                 || (dto.getSegundoApellido() != null && dto.getSegundoApellido().length() > 50)) {
             throw new IllegalArgumentException("Los datos del usuario exceden la longitud permitida.");

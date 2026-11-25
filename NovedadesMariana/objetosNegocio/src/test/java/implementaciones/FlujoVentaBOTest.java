@@ -1,6 +1,7 @@
 package implementaciones;
 
 import bos.PagoBO;
+import bos.VentaBO;
 import bos.ProductoBO;
 import bos.ProductoTallaBO;
 import bos.UsuarioBO;
@@ -76,6 +77,16 @@ class FlujoVentaBOTest {
                     + ", usuario=" + autenticado.getUsuario()
                     + ", rol=" + autenticado.getRolEmpleado());
             assertEquals(fixture.usuario.getId(), autenticado.getId());
+            UsuarioBO.getInstance().eliminar(autenticado.getId());
+            assertThrows(IllegalStateException.class,
+                    () -> VentaBO.getInstance().registrarVenta(fixture.nuevaVenta(1)));
+            assertEquals(18, inventario.obtenerTallasPorProducto(idProducto).get(0).getStockActual());
+            VentaDTO historica = VentaBO.getInstance().obtenerPorId(registrada.getId());
+            assertNotNull(historica);
+            assertEquals(registrada.getIdUsuario(), historica.getIdUsuario());
+            assertEquals(registrada.getFolio(), historica.getFolio());
+            assertNull(UsuarioBO.getInstance().autenticar(
+                    fixture.usuario.getUsuario(), fixture.usuario.getContrasenia()));
         }
     }
 }

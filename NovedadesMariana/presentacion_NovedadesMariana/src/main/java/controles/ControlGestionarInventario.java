@@ -48,16 +48,8 @@ public final class ControlGestionarInventario {
         if (criterio == null || criterio.isBlank()) {
             return cargarInventario();
         }
-        List<? extends interfaces.IProductoDTO> encontrados = gestorInventario.buscarProductos(criterio.trim());
-        List<ProductoDTO> resultado = new ArrayList<>();
-        if (encontrados != null) {
-            for (interfaces.IProductoDTO p : encontrados) {
-                if (p instanceof ProductoDTO dto) {
-                    resultado.add(dto);
-                }
-            }
-        }
-        return resultado;
+        List<ProductoDTO> resultado = gestorInventario.buscarProductos(criterio.trim());
+        return resultado == null ? new ArrayList<>() : new ArrayList<>(resultado);
     }
 
     /**
@@ -67,32 +59,16 @@ public final class ControlGestionarInventario {
         if (nombreCategoria == null || nombreCategoria.isBlank() || "Todas".equalsIgnoreCase(nombreCategoria.trim())) {
             return cargarInventario();
         }
-        List<? extends interfaces.IProductoDTO> encontrados = gestorInventario.buscarProductosPorCategoria(nombreCategoria.trim());
-        List<ProductoDTO> resultado = new ArrayList<>();
-        if (encontrados != null) {
-            for (interfaces.IProductoDTO p : encontrados) {
-                if (p instanceof ProductoDTO dto) {
-                    resultado.add(dto);
-                }
-            }
-        }
-        return resultado;
+        List<ProductoDTO> resultado = gestorInventario.buscarProductosPorCategoria(nombreCategoria.trim());
+        return resultado == null ? new ArrayList<>() : new ArrayList<>(resultado);
     }
 
     /**
      * Consulta las tallas y existencias de un producto.
      */
     public List<ProductoTallaDTO> obtenerTallas(int idProducto) {
-        List<? extends interfaces.IProductoTallaDTO> tallas = gestorInventario.obtenerTallasPorProducto(idProducto);
-        List<ProductoTallaDTO> resultado = new ArrayList<>();
-        if (tallas != null) {
-            for (interfaces.IProductoTallaDTO t : tallas) {
-                if (t instanceof ProductoTallaDTO dto) {
-                    resultado.add(dto);
-                }
-            }
-        }
-        return resultado;
+        List<ProductoTallaDTO> resultado = gestorInventario.obtenerTallasPorProducto(idProducto);
+        return resultado == null ? new ArrayList<>() : new ArrayList<>(resultado);
     }
 
     /**

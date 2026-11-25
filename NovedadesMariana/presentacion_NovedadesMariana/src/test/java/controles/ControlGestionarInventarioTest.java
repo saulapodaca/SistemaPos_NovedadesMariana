@@ -5,8 +5,6 @@ import dtos.CategoriaDTO;
 import dtos.ProductoDTO;
 import dtos.ProductoTallaDTO;
 import dtos.TipoPrendaDTO;
-import interfaces.IProductoDTO;
-import interfaces.IProductoTallaDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,17 +23,17 @@ class ControlGestionarInventarioTest {
         final List<CategoriaDTO> categorias = new ArrayList<>();
 
         @Override
-        public IProductoDTO buscarProductoPorCodigo(String codigo) {
+        public ProductoDTO buscarProductoPorCodigo(String codigo) {
             return productos.stream().filter(p -> codigo.equals(p.getCodigoBarras())).findFirst().orElse(null);
         }
 
         @Override
-        public IProductoDTO obtenerProductoPorId(int id) {
+        public ProductoDTO obtenerProductoPorId(int id) {
             return productos.stream().filter(p -> p.getId() != null && p.getId() == (long) id).findFirst().orElse(null);
         }
 
         @Override
-        public List<? extends IProductoDTO> listarProductosPorCategoria(int idCategoria) {
+        public List<ProductoDTO> listarProductosPorCategoria(int idCategoria) {
             return productos.stream()
                     .filter(p -> p.getCategoriasIds() != null && p.getCategoriasIds().contains((long) idCategoria))
                     .toList();

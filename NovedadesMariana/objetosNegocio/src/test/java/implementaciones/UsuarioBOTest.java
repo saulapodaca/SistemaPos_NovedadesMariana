@@ -21,7 +21,7 @@ class UsuarioBOTest {
 
     @AfterEach
     void limpiar() throws Exception {
-        fixture.close();
+        if (fixture != null) fixture.close();
     }
 
     @Test
@@ -76,7 +76,7 @@ class UsuarioBOTest {
     }
 
     @Test
-    void guardaActualizaYEliminaUsuarioPorLaFachada() throws Exception {
+    void guardaActualizaYDesactivaEmpleado() throws Exception {
         String nombre = "bo_" + UUID.randomUUID().toString().replace("-", "");
         UsuarioDTO nuevo = new UsuarioDTO(null, nombre, "clave-segura", "Luis",
                 "Prueba", "BO", "EMPLEADO");
@@ -84,11 +84,19 @@ class UsuarioBOTest {
 
         UsuarioDTO guardado = usuarioBO.buscarPorUsuario(nombre);
         assertNotNull(guardado);
-        guardado.setNombres("Luis Actualizado");
-        usuarioBO.actualizar(guardado);
-        assertEquals("Luis Actualizado", usuarioBO.buscarPorId(guardado.getId()).getNombres());
+        try {
+            assertTrue(guardado.isActivo());
+            guardado.setNombres("Luis Actualizado");
+            usuarioBO.actualizar(guardado);
+            assertEquals("Luis Actualizado", usuarioBO.buscarPorId(guardado.getId()).getNombres());
 
-        usuarioBO.eliminar(guardado.getId());
-        assertNull(usuarioBO.buscarPorId(guardado.getId()));
+            usuarioBO.eliminar(guardado.getId());
+            assertFalse(usuarioBO.buscarPorId(guardado.getId()).isActivo());
+            assertNull(usuarioBO.autenticar(nombre, "clave-segura"));
+            assertTrue(usuarioBO.obtenerTodos().stream().anyMatch(
+                    u -> guardado.getId().equals(u.getId()) && !u.isActivo()));
+        } finally {
+            BOTestFixture.borrarUsuarioDePrueba(guardado.getId(), nombre);
+        }
     }
 }

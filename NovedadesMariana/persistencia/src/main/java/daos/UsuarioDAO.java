@@ -51,7 +51,9 @@ public class UsuarioDAO implements IUsuarioDAO{
 
             // Actualizar datos personales
             existente.setUsuario(usuario.getUsuario());
-            existente.setContrasenia(usuario.getContrasenia());
+            if (usuario.getContrasenia() != null) {
+                existente.setContrasenia(usuario.getContrasenia());
+            }
             existente.setNombres(usuario.getNombres());
             existente.setPrimerApellido(
                 usuario.getPrimerApellido()
@@ -91,7 +93,8 @@ public class UsuarioDAO implements IUsuarioDAO{
                 Usuario.class, id
             );
 
-            em.remove(usuario);
+            if (usuario == null) throw new IllegalArgumentException("El usuario no existe.");
+            usuario.setActivo(false);
 
             em.getTransaction().commit();
 
@@ -101,7 +104,7 @@ public class UsuarioDAO implements IUsuarioDAO{
             }
 
             throw new Exception(
-                "Error al eliminar usuario: "
+                "Error al desactivar usuario: "
                 + e.getMessage(), e
             );
 

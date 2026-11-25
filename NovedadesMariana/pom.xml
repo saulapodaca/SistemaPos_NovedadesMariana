@@ -7,8 +7,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>dto_negocios</module>
-        <module>objetosNegocio</module>
         <module>persistencia</module>
+        <module>objetosNegocio</module>
         <module>negocios_GestorEmpleados</module>
         <module>negocios_AdministradorEmpleados</module>
         <module>negocios_GestorInventario</module>

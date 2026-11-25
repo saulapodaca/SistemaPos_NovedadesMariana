@@ -7,8 +7,10 @@ public final class UsuarioMapper {
     private UsuarioMapper() { }
     public static UsuarioDTO toDTO(Usuario usuario) {
         if (usuario == null) return null;
-        return new UsuarioDTO(usuario.getId(), usuario.getUsuario(), usuario.getContrasenia(), usuario.getNombres(),
+        UsuarioDTO dto = new UsuarioDTO(usuario.getId(), usuario.getUsuario(), usuario.getContrasenia(), usuario.getNombres(),
                 usuario.getPrimerApellido(), usuario.getSegundoApellido(), usuario.getRol() == null ? null : usuario.getRol().name());
+        dto.setActivo(usuario.isActivo());
+        return dto;
     }
     public static Usuario toEntity(UsuarioDTO dto) {
         if (dto == null) return null;
@@ -16,6 +18,7 @@ public final class UsuarioMapper {
         usuario.setId(dto.getId()); usuario.setUsuario(dto.getUsuario()); usuario.setContrasenia(dto.getContrasenia());
         usuario.setNombres(dto.getNombres()); usuario.setPrimerApellido(dto.getPrimerApellido()); usuario.setSegundoApellido(dto.getSegundoApellido());
         if (dto.getRolEmpleado() != null && !dto.getRolEmpleado().isBlank()) usuario.setRol(enums.RolEmpleado.valueOf(dto.getRolEmpleado()));
+        usuario.setActivo(dto.isActivo());
         return usuario;
     }
 }

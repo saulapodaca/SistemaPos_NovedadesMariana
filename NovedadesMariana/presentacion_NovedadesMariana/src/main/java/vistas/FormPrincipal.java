@@ -15,6 +15,7 @@ public final class FormPrincipal extends JFrame {
     private final JLabel empleado = new JLabel("Empleado sin identificar");
     private final JButton btnNavVentas = crearBotonNav("Punto de Venta", "VENTAS");
     private final JButton btnNavInventario = crearBotonNav("Gestión de Inventario", "INVENTARIO");
+    private final JButton btnNavEmpleados = crearBotonNav("Empleados", "EMPLEADOS");
     private Consumer<String> navegacionListener;
     private String moduloActual = "VENTAS";
 
@@ -48,6 +49,7 @@ public final class FormPrincipal extends JFrame {
         panelNav.setOpaque(false);
         panelNav.add(btnNavVentas);
         panelNav.add(btnNavInventario);
+        panelNav.add(btnNavEmpleados);
 
         // Zona de usuario / empleado
         JPanel panelEmpleado = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -121,6 +123,8 @@ public final class FormPrincipal extends JFrame {
     private void actualizarEstiloBotonesNav() {
         btnNavVentas.setForeground("VENTAS".equals(moduloActual) ? Estilo.AZUL : Color.WHITE);
         btnNavInventario.setForeground("INVENTARIO".equals(moduloActual) ? Estilo.AZUL : Color.WHITE);
+        btnNavEmpleados.setForeground("EMPLEADOS".equals(moduloActual) ? Estilo.AZUL : Color.WHITE);
+        btnNavEmpleados.repaint();
         btnNavVentas.repaint();
         btnNavInventario.repaint();
     }

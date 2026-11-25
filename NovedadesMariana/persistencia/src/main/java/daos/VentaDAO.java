@@ -37,10 +37,13 @@ public class VentaDAO implements IVentaDAO {
             em.getTransaction().begin();
 
             // Asociar usuario
-            Usuario usuario = em.getReference(
-                Usuario.class, venta.getUsuario().getId()
+            Usuario usuario = em.find(
+                Usuario.class, venta.getUsuario().getId(), jakarta.persistence.LockModeType.PESSIMISTIC_READ
             );
 
+            if (usuario == null || !usuario.isActivo()) {
+                throw new IllegalStateException("Se requiere un empleado activo para registrar la venta.");
+            }
             venta.setUsuario(usuario);
 
             // Asociar productos de la venta

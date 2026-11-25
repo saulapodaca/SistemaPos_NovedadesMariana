@@ -8,9 +8,7 @@ import dtos.ProductoDTO;
 import dtos.ProductoTallaDTO;
 import interfaces.ICategoriaBO;
 import interfaces.IProductoBO;
-import interfaces.IProductoDTO;
 import interfaces.IProductoTallaBO;
-import interfaces.IProductoTallaDTO;
 import java.util.List;
 
 /**

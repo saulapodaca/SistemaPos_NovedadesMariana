@@ -225,37 +225,33 @@ public class UsuarioDAOTest {
         );
     }
 
-    /** Elimina el usuario de prueba y valida que ya no pueda recuperarse. */
+    /** Verifica que la baja conserva el registro inactivo. */
     @Test
     @Order(6)
-    public void testEliminar() throws Exception {
-
-        assertNotNull(idPrueba);
-
+    public void desactivarConservaElRegistro() throws Exception {
+        assertTrue(usuarioDAO.buscarPorId(idPrueba).isActivo());
         usuarioDAO.eliminar(idPrueba);
-
-        // 🔴 BREAKPOINT 3: Confirmar el resultado de la búsqueda posterior al borrado.
-        Usuario eliminado =
-                usuarioDAO.buscarPorId(idPrueba);
-
-        System.out.println("🗑️ [TEST ELIMINAR] Resultado de búsqueda: " + eliminado);
-        assertNull(
-            eliminado,
-            "El usuario debe haberse eliminado."
-        );
+        usuarioDAO.eliminar(idPrueba);
+        Usuario inactivo = usuarioDAO.buscarPorUsuario(nombreUsuarioPrueba);
+        assertNotNull(inactivo);
+        assertEquals(idPrueba, inactivo.getId());
+        assertFalse(inactivo.isActivo());
     }
 
-    /** Limpia el usuario si la ejecución se interrumpió antes de testEliminar. */
     @AfterAll
-    public static void limpiarDatos() throws Exception {
-
-        if (idPrueba != null) {
-
-            Usuario usuario =
-                    usuarioDAO.buscarPorId(idPrueba);
-
-            if (usuario != null) {
-                usuarioDAO.eliminar(idPrueba);
+    public static void limpiarDatos() {
+        if (idPrueba == null) return;
+        try (var em = conexion.ConexionJPA.getInstance().getEntityManager()) {
+            var tx = em.getTransaction();
+            tx.begin();
+            try {
+                Usuario usuario = em.find(Usuario.class, idPrueba);
+                if (usuario != null && nombreUsuarioPrueba.equals(usuario.getUsuario())) {
+                    em.remove(usuario);
+                }
+                tx.commit();
+            } finally {
+                if (tx.isActive()) tx.rollback();
             }
         }
     }
