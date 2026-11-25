@@ -20,7 +20,7 @@
     </properties>
   </persistence-unit>
 
-  <!-- Unidad de persistencia de pruebas, sin generar ni borrar el esquema. -->
+ <!-- Unidad de persistencia de pruebas -->
   <persistence-unit name="persistenciaPU_Test" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>dominio.Categoria</class>
@@ -35,7 +35,7 @@
       <property name="jakarta.persistence.jdbc.user" value="root"/>
       <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
       <property name="jakarta.persistence.jdbc.password" value="itson"/>
-      <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+      <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
     </properties>
   </persistence-unit>
 

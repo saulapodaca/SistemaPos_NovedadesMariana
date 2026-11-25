@@ -4,8 +4,6 @@
  */
 package com.itson.negocios_gestorinventario;
 
-import bos.ProductoBO;
-import bos.ProductoTallaBO;
 import dtos.ProductoDTO;
 import dtos.ProductoTallaDTO;
 import interfaces.IProductoBO;
@@ -18,8 +16,8 @@ import java.util.List;
  */
 public class GestorInventario implements IGestorInventario {
 
-    private final IProductoBO productoBO = ProductoBO.getInstance();
-    private final IProductoTallaBO productoTallaBO = ProductoTallaBO.getInstance();
+    private final IProductoBO productoBO =  ProductoBO.getInstance();
+    private final IProductoTallaBO productoTallaBO =  ProductoTallaBO.getInstance();
 
     public GestorInventario() {
     }
@@ -71,5 +69,15 @@ public class GestorInventario implements IGestorInventario {
             }
         }
         return List.of();
+    }
+
+    @Override
+    public ProductoDTO agregarProducto(ProductoDTO producto) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public ProductoDTO buscarProductoPorSKU(String sku) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

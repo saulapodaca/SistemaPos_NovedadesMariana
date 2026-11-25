@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="dto_negocios" target="21" />
+      <module name="negocios_GestorEmpleados" target="21" />
+      <module name="negocios_GestorInventario" target="21" />
+      <module name="negocios_GestorPagos" target="21" />
+      <module name="negocios_GestorVentas" target="21" />
+      <module name="negocios_RealizarVenta" target="21" />
+      <module name="NovedadesMariana" target="1.5" />
+      <module name="objetosNegocio" target="21" />
+      <module name="persistencia" target="21" />
+      <module name="presentacion_NovedadesMariana" target="21" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

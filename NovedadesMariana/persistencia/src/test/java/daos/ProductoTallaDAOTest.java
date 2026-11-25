@@ -5,9 +5,9 @@ import dominio.ProductoTalla;
 import enums.TipoPrenda;
 import interfaces.IProductoDAO;
 import interfaces.IProductoTallaDAO;
-import org.junit.jupiter.api.*;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -214,7 +214,7 @@ public class ProductoTallaDAOTest {
         // Simular un fallo antes de eliminar la talla bloqueada.
         Exception excepcion = assertThrows(
             Exception.class,
-            () -> productoTallaDAO.eliminar(idPrueba, talla -> {
+            () -> productoTallaDAO.eliminar(idPrueba , talla -> {
                 assertNotNull(talla);
                 throw new IllegalStateException("Fallo simulado");
             })

@@ -13,7 +13,11 @@ import java.util.List;
  * @author saula
  */
 public interface IGestorInventario {
+    ProductoDTO agregarProducto(ProductoDTO producto);
+    
     ProductoDTO buscarProductoPorCodigo(String codigo);
+    
+    ProductoDTO buscarProductoPorSKU(String sku);
 
     ProductoDTO obtenerProductoPorId(int id);
 
@@ -26,6 +30,8 @@ public interface IGestorInventario {
     boolean descontarStock(int idProductoTalla, int cantidad);
 
     boolean reabastecerStock(int idProductoTalla, int cantidad);
+    
     List<ProductoDTO> buscarProductos(String criterio);
+    
     List<ProductoDTO> buscarProductosPorCategoria(String nombre);
 }
